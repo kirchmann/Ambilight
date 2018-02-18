@@ -20,48 +20,50 @@ class ambilight {
         Robot robot;
         try{
         	robot = new Robot();
-
         	Rectangle area = new Rectangle(Toolkit.getDefaultToolkit().getScreenSize()); 
      		BufferedImage bi = robot.createScreenCapture(area);
+     		get_RGB_array(bi);
      		//final byte[] pixels = ((DataBufferByte) bi.getRaster().getDataBuffer()).getData();
-            final int width = bi.getWidth();
+            final int width  = bi.getWidth();
             final int height = bi.getHeight();
-            int[] red_left = new int[height/4];
-            int[] red_right= new int[height/4];
-            int[] red_top= new int[width/4];
-            int[] green_left= new int[height/4];
-            int[] green_right= new int[height/4];
-            int[] green_top= new int[width/4];
-            int[] blue_left=new int[height/4];
-            int[] blue_right=new int[height/4];
-            int[] blue_top=new int[width/4];
-            int color_l;
-            int color_r;
+            // This structure will lead to space not getting used in first and second row since there are fewer pixels
+            int[][] red_s	= new int[2][height/4];
+            int[][] green_s	= new int[2][height/4];
+            int[][] blue_s	= new int[2][height/4];
+            
+            int[] red_t		= new int[width/4];
+            int[] green_t	= new int[width/4];
+            int[] blue_t	= new int[width/4];
+            int tColor;
             
             System.out.println("Width: "+width+" height: "+height);
+
             // Extract every fourth pixel value on left and right side of screen 
-            for (y=0;y<height-5;y+=4) {
-            	color_l = bi.getRGB(0,y);
-            	blue_left[k] = color_l & 0xff;
-         		green_left[k] = (color_l & 0xff00) >> 8;
-         		red_left[k] = (color_l & 0xff0000) >> 16;
-         		color_r = bi.getRGB(width-1,y);
-            	blue_right[k] = color_r & 0xff;
-         		green_right[k] = (color_r & 0xff00) >> 8;
-         		red_right[k] = (color_r & 0xff0000) >> 16;
+            double startTime = System.nanoTime();
+            for (y=0;y<height-4;y+=4) {
+            	tColor = bi.getRGB(0,y);
+            	blue_s[0][k] = tColor & 0xff;
+         		green_s[0][k] = (tColor & 0xff00) >> 8;
+         		red_s[0][k] = (tColor & 0xff0000) >> 16;
+         		tColor = bi.getRGB(width-1,y);
+            	blue_s[1][k] = tColor & 0xff;
+         		green_s[1][k] = (tColor & 0xff00) >> 8;
+         		red_s[1][k] = (tColor & 0xff0000) >> 16;
          		k++;
             }
-            System.out.println("y: "+y+" k: "+k);
+            double endTime = System.nanoTime();
+            System.out.printf("%f", (double)((endTime - startTime)/1000000));
+            System.out.println("ms");
             k=0;
             // Extract every fourth pixel value on top side of screen
-            for (x=0;x<width-4;x+=4) {
-            	color_l = bi.getRGB(x,0);
-            	blue_top[k] = color_l & 0xff;
-         		green_top[k] = (color_l & 0xff00) >> 8;
-         		red_top[k] = (color_l & 0xff0000) >> 16;
+            for (x = 0;x < width-4;x += 4) {
+            	tColor = bi.getRGB(x,0);
+            	blue_t[k] = tColor & 0xff;
+         		green_t[k] = (tColor & 0xff00) >> 8;
+         		red_t[k] = (tColor & 0xff0000) >> 16;
          		k++;
             }
-            System.out.println("x: "+x+" k: "+k);
+            System.out.println("x: "+ x +" k: "+ k );
      		
      		// loop over the circumference of the image and do an averaging that is dependent on the number of neopixels
      		//https://www.tutorialspoint.com/java_dip/java_buffered_image.htm
@@ -69,16 +71,22 @@ class ambilight {
             // neopixels height: 16
             // pixel width: 1920
             // pixel height: 1080
+            // 1920/4/30 = 16
+            // 1080/4/16 = 9
             
             File outputfile = new File("saved.png");
      		ImageIO.write(bi, "png", outputfile);
 
      		System.out.println("screensize: "+ Toolkit.getDefaultToolkit().getScreenSize()); // Display the string.
-     		System.out.println(bi.getAlphaRaster());
      		
         } catch (Exception e) {
         	e.printStackTrace();
         }
         
     }
+    private static void get_RGB_array(BufferedImage image) {
+    	final int width  = image.getWidth();
+        final int height = image.getHeight();
+    }
+    
 }
