@@ -1,10 +1,26 @@
 import java.awt.*;
 import java.awt.image.*;
-//import processing.serial.*;
+import java.io.IOException;
+
+import gnu.io.CommPortIdentifier;
+import gnu.io.NoSuchPortException;
+import gnu.io.PortInUseException;
+import gnu.io.SerialPort;
+import gnu.io.UnsupportedCommOperationException;
+/**
+ * 
+ */
+
+/**
+ * @author Carl Christian
+ *
+ */
 class ambilight {
-    public static void main(String[] args) {
+    public static void main(String[] args) throws IOException {
         System.out.println("Hello World!"); // Display the string.
         Robot robot;
+        SerialComm com = new SerialComm();
+        com.ConnectPort(9600, "COM3");
         try{
         	robot = new Robot();
         	Rectangle area = new Rectangle(Toolkit.getDefaultToolkit().getScreenSize()); 
