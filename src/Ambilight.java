@@ -1,6 +1,7 @@
 import java.awt.*;
 import java.awt.image.*;
 import java.io.IOException;
+import java.io.OutputStream;
 
 import gnu.io.CommPortIdentifier;
 import gnu.io.NoSuchPortException;
@@ -19,8 +20,13 @@ class ambilight {
     public static void main(String[] args) throws IOException {
         System.out.println("Hello World!"); // Display the string.
         Robot robot;
+        char serialMessage = '\n';
         SerialComm com = new SerialComm();
         com.ConnectPort(9600, "COM3");
+        com.sendData((int)serialMessage);
+        //serialOutputStream.write(serialMessage);
+        //serialOutputStream.flush();
+
         try{
         	robot = new Robot();
         	Rectangle area = new Rectangle(Toolkit.getDefaultToolkit().getScreenSize()); 

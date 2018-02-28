@@ -64,4 +64,23 @@ public class SerialComm {
     public OutputStream getSerialOutputStream() {
         return outStream;
     }
+    
+    /**
+     * Write to the serial port output stream
+     */
+    public void sendData(int data)
+    {
+        try
+        {
+        	outStream.write(data);
+        	outStream.flush();
+            
+          
+        }
+        catch (Exception e)
+        {
+            String logText = "Failed to write data. (" + e.toString() + ")";
+            System.out.println(logText);
+        }
+    }
 }
