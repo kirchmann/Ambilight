@@ -1,7 +1,7 @@
 import java.io.IOException;
+
 import java.io.InputStream;
 import java.io.OutputStream;
-
 import gnu.io.CommPortIdentifier;
 import gnu.io.NoSuchPortException;
 import gnu.io.PortInUseException;
@@ -41,8 +41,27 @@ public class SerialComm {
         } catch (UnsupportedCommOperationException | PortInUseException ex) {
             throw new IOException("Unsupported serial port parameter");
         } catch (NoSuchPortException e) {
-            throw new IOException(e.getMessage());
-        }
-        
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} 
+        OutputStream outStream = serialPort.getOutputStream();
+        InputStream inStream = serialPort.getInputStream();
 	}
+	
+	
+    /**
+     * Get the serial port input stream
+     * @return The serial port input stream
+     */
+    public InputStream getSerialInputStream() {
+        return inStream;
+    }
+ 
+    /**
+     * Get the serial port output stream
+     * @return The serial port output stream
+     */
+    public OutputStream getSerialOutputStream() {
+        return outStream;
+    }
 }
