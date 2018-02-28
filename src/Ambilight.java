@@ -31,17 +31,27 @@ class ambilight {
             final int height = bi.getHeight();
             // Java supports jagged arrays, can turn the red_s and red_t into one matrix
             // https://www.geeksforgeeks.org/jagged-array-in-java/
-            int[][] red_s	= new int[2][height/4];
-            int[][] green_s	= new int[2][height/4];
-            int[][] blue_s	= new int[2][height/4];
+            // Screen side of row in red, green and blue: left, right, top 
+            int[][] red = new int[3][];
+            int[][] green = new int[3][];
+            int[][] blue = new int[3][];
+            // Initialize arrays for left and right side
+            red[0]	= new int[height/4];
+            green[0] = new int[height/4];
+            blue[0]	= new int[height/4];
+            red[1]	= new int[height/4];
+            green[1] = new int[height/4];
+            blue[1]	= new int[height/4];
             
-            int[] red_t		= new int[width/4];
-            int[] green_t	= new int[width/4];
-            int[] blue_t	= new int[width/4];
-            get_RGB_arrays(bi,red_s,blue_s,green_s,red_t,blue_t,green_t);
+            // Initialize arrays for left and right side
+            red[2]	= new int[width/4];
+            green[2] = new int[width/4];
+            blue[2]	= new int[width/4];
+
+            get_RGB_arrays(bi,red,blue,green);
             bi.flush();
             System.out.println("Width: "+width+" height: "+height);
-            System.out.println("blue: "+ blue_s[0][100]);
+            System.out.println("blue: "+ blue[0][100]);
 
      		// loop over the circumference of the image and do an averaging that is dependent on the number of neopixels
      		//https://www.tutorialspoint.com/java_dip/java_buffered_image.htm
@@ -56,7 +66,8 @@ class ambilight {
         }
         
     }
-    private static void get_RGB_arrays(BufferedImage image,int red_s[][],int green_s[][],int blue_s[][],int red_t[],int green_t[],int blue_t[]) {
+    private static void get_RGB_arrays(BufferedImage image,int red[][],int green[][],int blue[][]) {
+    	// TODO Instead of separate loops, extract both in same loop and then loop from height-4 to width-4 for top values
     	final int width  = image.getWidth();
         final int height = image.getHeight();
         int tColor;
@@ -65,14 +76,14 @@ class ambilight {
         double startTime = System.nanoTime();
         for (y=0;y<height-4;y+=4) {
         	tColor = image.getRGB(0,y);
-        	blue_s[0][k] = tColor & 0xff;
-     		green_s[0][k] = (tColor & 0xff00) >> 8;
-     		red_s[0][k] = (tColor & 0xff0000) >> 16;
+        	blue[0][k] = tColor & 0xff;
+     		green[0][k] = (tColor & 0xff00) >> 8;
+     		red[0][k] = (tColor & 0xff0000) >> 16;
      		//System.out.println("blue: "+ blue_s[0][k]);
      		tColor = image.getRGB(width-1,y);
-        	blue_s[1][k] = tColor & 0xff;
-     		green_s[1][k] = (tColor & 0xff00) >> 8;
-     		red_s[1][k] = (tColor & 0xff0000) >> 16;
+        	blue[1][k] = tColor & 0xff;
+     		green[1][k] = (tColor & 0xff00) >> 8;
+     		red[1][k] = (tColor & 0xff0000) >> 16;
      		k++;
 
         }
@@ -83,10 +94,9 @@ class ambilight {
         // Extract every fourth pixel value on top side of screen
         for (x = 0;x < width-4;x += 4) {
         	tColor = image.getRGB(x,0);
-        	blue_t[k] = tColor & 0xff;
-     		green_t[k] = (tColor & 0xff00) >> 8;
-     		red_t[k] = (tColor & 0xff0000) >> 16;
-     		//System.out.println("blue: "+ blue_t[k]);
+        	blue[2][k] = tColor & 0xff;
+     		green[2][k] = (tColor & 0xff00) >> 8;
+     		red[2][k] = (tColor & 0xff0000) >> 16;
      		k++;
      		
         }
