@@ -1,13 +1,6 @@
 import java.awt.*;
 import java.awt.image.*;
 import java.io.IOException;
-import java.io.OutputStream;
-
-import gnu.io.CommPortIdentifier;
-import gnu.io.NoSuchPortException;
-import gnu.io.PortInUseException;
-import gnu.io.SerialPort;
-import gnu.io.UnsupportedCommOperationException;
 /**
  * 
  */
@@ -20,10 +13,12 @@ class ambilight {
     public static void main(String[] args) throws IOException {
         System.out.println("Hello World!"); // Display the string.
         Robot robot;
-        char serialMessage = '\n';
+        String serialMessage = "a\n";
         SerialComm com = new SerialComm();
         com.ConnectPort(9600, "COM3");
-        com.sendData((int)serialMessage);
+        //com.sendData((int)serialMessage);
+        
+        
         //serialOutputStream.write(serialMessage);
         //serialOutputStream.flush();
 
@@ -70,7 +65,17 @@ class ambilight {
         } catch (Exception e) {
         	e.printStackTrace();
         }
+        while(true) {
+        	com.getSerialOutputStream().write(serialMessage.getBytes());
+        	try {
+				Thread.sleep(400);
+			} catch (InterruptedException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+        }
         
+        //com.disconnect();
     }
     private static void get_RGB_arrays(BufferedImage image,int red[][],int green[][],int blue[][]) {
     	// TODO Instead of separate loops, extract both in same loop and then loop from height-4 to width-4 for top values
