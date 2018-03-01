@@ -2,19 +2,21 @@
 
 Ambilight for computer screen using an arduino and neopixels
 
-## Deployment
-
-Add additional notes about how to deploy this on a live system
 
 ## Built With
 
 * JAVA 9
 * Arduino
 
+## To do
+
+* Send RGB values over serial to Arduino
+* Control LEDS with Arduino using RBG values recieved over serial
+* Evaluate performance
 
 ## Authors
 
-* **Carl Christian Kirchmann
+* Carl Christian Kirchmann
 
 
 ## License
