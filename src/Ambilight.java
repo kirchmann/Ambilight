@@ -13,14 +13,9 @@ class ambilight {
     public static void main(String[] args) throws IOException {
         System.out.println("Hello World!"); // Display the string.
         Robot robot;
-        String serialMessage = "a\n";
         SerialComm com = new SerialComm();
         com.ConnectPort(9600, "COM3");
-        //com.sendData((int)serialMessage);
-        
-        
-        //serialOutputStream.write(serialMessage);
-        //serialOutputStream.flush();
+
 
         try{
         	robot = new Robot();
@@ -52,7 +47,7 @@ class ambilight {
             get_RGB_arrays(bi,red,blue,green);
             bi.flush();
             System.out.println("Width: "+width+" height: "+height);
-            System.out.println("blue: "+ blue[0][100]);
+            System.out.println("blue: "+ Integer.toBinaryString(blue[0][100]));
 
      		// loop over the circumference of the image and do an averaging that is dependent on the number of neopixels
      		//https://www.tutorialspoint.com/java_dip/java_buffered_image.htm
@@ -66,7 +61,16 @@ class ambilight {
         	e.printStackTrace();
         }
         while(true) {
-        	com.getSerialOutputStream().write(serialMessage.getBytes());
+        	
+            int message = 255;
+            // TODO add start of message. 
+            byte MESSAGE_START[] = { 0x02, 0x02, 0x02, 0x02, 0x02, 0x02, 0x02, 0x02, 0x02, 0x02};
+        	byte lower =(byte)(message & 0xFF); //Get the lower 8bits
+        	com.getSerialOutputStream().write(lower);
+        	com.getSerialOutputStream().write("A".getBytes());
+        	
+        	//com.getSerialOutputStream().flush();
+        	
         	try {
 				Thread.sleep(400);
 			} catch (InterruptedException e) {
