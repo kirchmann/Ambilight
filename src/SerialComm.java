@@ -33,7 +33,7 @@ public class SerialComm {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
-			serialPort.setSerialPortParams(9600,SerialPort.DATABITS_8,SerialPort.STOPBITS_1,SerialPort.PARITY_NONE);
+			serialPort.setSerialPortParams(115200,SerialPort.DATABITS_8,SerialPort.STOPBITS_1,SerialPort.PARITY_NONE);
             serialPort.setFlowControlMode(SerialPort.FLOWCONTROL_NONE);
 
         } catch (UnsupportedCommOperationException e) {
