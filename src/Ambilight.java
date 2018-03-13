@@ -16,7 +16,6 @@ class ambilight {
         SerialComm com = new SerialComm();
         com.ConnectPort(9600, "COM3");
 
-
         try{
         	robot = new Robot();
         	Rectangle area = new Rectangle(Toolkit.getDefaultToolkit().getScreenSize()); 
@@ -64,10 +63,13 @@ class ambilight {
         	
             int message = 255;
             // TODO add start of message. 
-            byte MESSAGE_START[] = { 0x02, 0x02, 0x02, 0x02, 0x02, 0x02, 0x02, 0x02, 0x02, 0x02};
+            byte MESSAGE_START[] = {0x01, 0x02, 0x03, 0x01, 0x02, 0x03, 0x01, 0x02, 0x03, 0x01};
         	byte lower =(byte)(message & 0xFF); //Get the lower 8bits
+        	for (int i = 0;i<10;i++) {
+        		com.getSerialOutputStream().write(MESSAGE_START[i]);
+        	}
         	com.getSerialOutputStream().write(lower);
-        	com.getSerialOutputStream().write("A".getBytes());
+        	//com.getSerialOutputStream().write("A".getBytes());
         	
         	//com.getSerialOutputStream().flush();
         	

@@ -23,7 +23,7 @@ const int NUM_LEDS = 30; // Number of leds
 
 CRGB leds[NUM_LEDS];
 
-byte MESSAGE_START[] = { 0x02, 0x02, 0x02, 0x02, 0x02, 0x02, 0x02, 0x02, 0x02, 0x02};
+byte MESSAGE_START[] = { 0x01, 0x02, 0x03, 0x01, 0x02, 0x03, 0x01, 0x02, 0x03, 0x01};
 uint8_t MESSAG_START_LENGTH = 10;
 uint8_t current_message_start_position = 0;
 
@@ -55,30 +55,52 @@ void setup() {
   pinMode(ledPin, OUTPUT);
   digitalWrite(ledPin,LOW);
   FastLED.addLeds<WS2812B, 9, GRB>(leds, NUM_LEDS);
-  //FastLED.addLeds<NEOPIXEL, DATA_PIN>(leds, NUM_LEDS);
-
 }
 
 void loop() {
   // print the string when a newline arrives:
   int i = 0;
-  if (Serial.available() > 0) {
-    Serial.readBytesUntil('A', red_top, 30);
-
-   /* if (text==255) {
-      digitalWrite(ledPin,HIGH);
-      delay(2);
-    }*/
+  if (waitStartMessage(3000)) {
+    digitalWrite(ledPin,HIGH);
+    delay(2000);
   }
-          for(int dot = 0; dot < NUM_LEDS; dot++) { 
-            leds[dot].blue = 255;
-            FastLED.show();
-            // clear this led for the next time around the loop
-            leds[dot] = CRGB::Black;
-            delay(30);
-        }
-
-  
+  digitalWrite(ledPin,LOW);
+  delay(1000);
+  /*for(int dot = 0; dot < NUM_LEDS; dot++) { 
+    leds[dot].blue = 255;
+    FastLED.show();
+    // clear this led for the next time around the loop
+    leds[dot] = CRGB::Black;
+    delay(30);
+}
+*/
 }
 
+bool waitStartMessage(int timeout)
+{
+  int t1 = millis();
+  while (current_message_start_position < MESSAG_START_LENGTH)
+  {
+    if (Serial.available() > 0)
+    {
+      t1 = millis();
+
+      if (Serial.read() == MESSAGE_START[current_message_start_position])
+      {
+        current_message_start_position++;
+      }
+      else
+      {
+        current_message_start_position = 0;
+      }
+    }
+
+    if (millis() - t1 > timeout)
+    {
+      return false;
+    }
+  }
+  current_message_start_position = 0;
+  return true;
+}
 
