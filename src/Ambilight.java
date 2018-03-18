@@ -14,8 +14,7 @@ class ambilight {
         System.out.println("Hello World!"); // Display the string.
         Robot robot;
         SerialComm com = new SerialComm();
-        com.ConnectPort(9600, "COM3");
-
+        com.ConnectPort(115200, "COM3");
         try{
         	robot = new Robot();
         	Rectangle area = new Rectangle(Toolkit.getDefaultToolkit().getScreenSize()); 
@@ -45,6 +44,7 @@ class ambilight {
 
             get_RGB_arrays(bi,red,blue,green);
             bi.flush();
+            averageRGB(red,blue,green);
             System.out.println("Width: "+width+" height: "+height);
             System.out.println("blue: "+ Integer.toBinaryString(blue[0][100]));
 
@@ -60,25 +60,35 @@ class ambilight {
         	e.printStackTrace();
         }
         while(true) {
-        	
-            int message = 255;
+            //int message = 255;
+            //byte lower =(byte)(message & 0xFF); //Get the lower 8bits
             // TODO add start of message. 
-            byte MESSAGE_START[] = {0x01, 0x02, 0x03, 0x01, 0x02, 0x03, 0x01, 0x02, 0x03, 0x01};
-        	byte lower =(byte)(message & 0xFF); //Get the lower 8bits
+            /*
+            byte MESSAGE_START[] = {0x01, 0x04, 0x06, 0x08, 0x010, 0x12, 0x14, 0x16, 0x18, 0x20};
         	for (int i = 0;i<10;i++) {
         		com.getSerialOutputStream().write(MESSAGE_START[i]);
         	}
-        	com.getSerialOutputStream().write(lower);
-        	//com.getSerialOutputStream().write("A".getBytes());
-        	
-        	//com.getSerialOutputStream().flush();
-        	
+        	*/
+            //byte MESSAGE_START[] = {0x01, 0x04, 0x06, 0x08, 0x010, 0x12, 0x14, 0x16, 0x18, 0x20};
+            
+        	byte startMarker = 0x3C;
+            byte endMarker = 0x3E;
+            byte MESSAGE_START_FULL[] = {startMarker, 0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08, 0x09, 0x10,0x11, 0x12, 0x13, 0x14, 0x015, 0x16, 0x17, 0x18, 0x19, 0x20, 0x21, 0x22, 0x23, 0x24, 0x25, 0x26, 0x27, 0x28, 0x29, 0x30, endMarker};
+            com.getSerialOutputStream().write(MESSAGE_START_FULL);
+        	/*
         	try {
-				Thread.sleep(400);
+				Thread.sleep(300);
 			} catch (InterruptedException e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
+			*/
+
+        	/*
+        	for (int i = 15;i<30;i++) {
+        		com.getSerialOutputStream().write(0xFF);
+        	}
+        	*/
         }
         
         //com.disconnect();
@@ -104,9 +114,6 @@ class ambilight {
      		k++;
 
         }
-        double endTime = System.nanoTime();
-        System.out.printf("%f", (double)((endTime - startTime)/1000000));
-        System.out.println("ms");
         k=0;
         // Extract every fourth pixel value on top side of screen
         for (x = 0;x < width-4;x += 4) {
@@ -115,8 +122,37 @@ class ambilight {
      		green[2][k] = (tColor & 0xff00) >> 8;
      		red[2][k] = (tColor & 0xff0000) >> 16;
      		k++;
-     		
         }
+        double endTime = System.nanoTime();
+        System.out.println("Time screenshot:");
+        System.out.printf("%f", (double)((endTime - startTime)/1000000));
+        System.out.println("ms");
     }
+    
+    private static void averageRGB(int red[][],int green[][],int blue[][]) {
+    	// TODO Instead of separate loops, extract both in same loop and then loop from height-4 to width-4 for top values
+        int[][] R_avg = new int[3][30];
+        int[][] G_avg = new int[3][30];
+        int[][] B_avg = new int[3][30];
+        int i,j,k;
+        int sum_R = 0;
+        int sum_G = 0;
+        int sum_B = 0;
+        double startTime = System.nanoTime();
+        for (i = 0;i<3;i++) {
+	        for (j = 0;j<30;j++) {
+	        	for (k = 30*j;k<30*j;k++) {
+	        		sum_R = red[i][k];
+	        		sum_G = green[i][k];
+	        		sum_B = blue[i][k];
+	        	}
+	        	R_avg[i][j] = sum/30;
+	        }
+        }
+        double endTime = System.nanoTime();
+        System.out.println("Time averaging:");
+        System.out.printf("%f", (double)((endTime - startTime)/1000000));
+        System.out.println("ms");
+        }
     
 }
