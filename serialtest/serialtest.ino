@@ -17,7 +17,7 @@
 
 
 // LED PINS
-#define DATA_PIN 7;    // data pin to neopixels
+#define DATA_PIN 7;    // data pin to neopixels, Green: datapin, white: GND, red: power (5V)
 
 const int NUM_LEDS = 30; // Number of leds
 
@@ -47,7 +47,7 @@ void setup() {
   Serial.begin(115200);
   pinMode(ledPin, OUTPUT);
   digitalWrite(ledPin,LOW);
-  FastLED.addLeds<WS2812B, 9, GRB>(leds, NUM_LEDS);
+  FastLED.addLeds<WS2812B, 7, GRB>(leds, NUM_LEDS);
   LcdInitialise();
   LcdClear();
   LcdString ("Starting");
@@ -63,8 +63,8 @@ void loop() {
   recvBytesWithStartEndMarkers();
   //FastLED.show();
   digitalWrite(ledPin,LOW);
-
-  /*for(int dot = 0; dot < NUM_LEDS; dot++) { 
+/*
+  for(int dot = 0; dot < NUM_LEDS; dot++) { 
     leds[dot].blue = 255;
     FastLED.show();
     // clear this led for the next time around the loop
@@ -92,8 +92,14 @@ void showNewData() {
         char str[32] = "";
         array_to_string(receivedBytes, numReceived, str);
         LcdString(str);
-        delay(250);
         newData = false;
+        for(int dot = 0; dot < numReceived; dot++) { 
+          leds[dot].blue = receivedBytes[dot];
+        }
+        FastLED.show();
+        delay(250);
+        FastLED.clear();
+        FastLED.show();
     } else {
       LcdString("nothing");
     }
@@ -133,7 +139,6 @@ void recvBytesWithStartEndMarkers() {
                 }
             }
         }
-
         else if (rb == startMarker) {
             recvInProgress = true;
         }
