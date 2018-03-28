@@ -19,15 +19,14 @@
 // LED PINS
 #define DATA_PIN 7;    // data pin to neopixels, Green: datapin, white: GND, red: power (5V)
 
-const int NUM_LEDS = 30; // Number of leds
-
+const int NUM_LEDS = 30; // Number of leds, 15 + 30 + 15
 CRGB leds[NUM_LEDS];
 byte MESSAGE_START[] = {0x01, 0x04, 0x06, 0x08, 0x010, 0x12, 0x14, 0x16, 0x18, 0x20};
 uint8_t MESSAG_START_LENGTH = 10;
 uint8_t current_message_start_position = 0;
 
 
-const byte numBytes = 32;
+const byte numBytes = 182; //NUM_LEDS*3 (R,G and B -> 3)
 byte receivedBytes[numBytes];
 byte numReceived = 0;
 
@@ -89,18 +88,20 @@ void showNewData() {
     if (newData == true) {
         gotoXY(0,0);
         LcdString ("RX:");
-        char str[32] = "";
+        char str[32] = "";// too many to print all 182
         array_to_string(receivedBytes, numReceived, str);
         LcdString(str);
         newData = false;
+        // Set R,G,B for all leds (NUM_LEDS)
         for(int dot = 0; dot < numReceived; dot++) { 
           leds[dot].blue = receivedBytes[dot];
         }
         FastLED.show();
-        delay(250);
+        delay(100);
         FastLED.clear();
         FastLED.show();
     } else {
+      gotoXY(0,0);
       LcdString("nothing");
     }
 }
@@ -143,35 +144,6 @@ void recvBytesWithStartEndMarkers() {
             recvInProgress = true;
         }
     }
-}
-
-
-bool waitStartMessage(int timeout)
-{
-  int t1 = millis();
-  while (current_message_start_position < MESSAG_START_LENGTH)
-  {
-    if (Serial.available() > 0)
-    {
-      t1 = millis();
-
-      if (Serial.read() == MESSAGE_START[current_message_start_position])
-      {
-        current_message_start_position++;
-      }
-      else
-      {
-        current_message_start_position = 0;
-      }
-    }
-
-    if (millis() - t1 > timeout)
-    {
-      return false;
-    }
-  }
-  current_message_start_position = 0;
-  return true;
 }
 
 static const byte ASCII[][5] =
