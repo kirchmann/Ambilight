@@ -1,6 +1,4 @@
 #include <FastLED.h>
-//Constants
-
 // LCD Defintitions
 #define PIN_RESET 12  // LCD RST .... Pin 1
 #define PIN_SCE   11  // LCD CS  .... Pin 3
@@ -15,23 +13,17 @@
 #define LCD_Y     48
 #define LCD_CMD   0
 
-
 // LED PINS
 #define DATA_PIN 7;    // data pin to neopixels, Green: datapin, white: GND, red: power (5V)
 
-const int NUM_LEDS = 30; // Number of leds, 15 + 30 + 15
+const int NUM_LEDS = 60; // Number of leds, 15 + 30 + 15
 CRGB leds[NUM_LEDS];
-byte MESSAGE_START[] = {0x01, 0x04, 0x06, 0x08, 0x010, 0x12, 0x14, 0x16, 0x18, 0x20};
-uint8_t MESSAG_START_LENGTH = 10;
-uint8_t current_message_start_position = 0;
 
-
-const byte numBytes = 182; //NUM_LEDS*3 (R,G and B -> 3)
+const byte numBytes = 18; //NUM_LEDS*3 (R,G and B -> 3)
 byte receivedBytes[numBytes];
 byte numReceived = 0;
 
 boolean newData = false;
-const int ledPin = 13;       // the pin that the LED is attached to
 
 int red_side[2][16];
 byte red_top[30];
@@ -44,8 +36,6 @@ int blue_top[30];
 void setup() {
   // initialize serial:
   Serial.begin(115200);
-  pinMode(ledPin, OUTPUT);
-  digitalWrite(ledPin,LOW);
   FastLED.addLeds<WS2812B, 7, GRB>(leds, NUM_LEDS);
   LcdInitialise();
   LcdClear();
@@ -57,20 +47,10 @@ void setup() {
 void loop() {
   // print the string when a newline arrives:
   int i;
-  LcdClear();
+  //LcdClear();
   showNewData();
   recvBytesWithStartEndMarkers();
-  //FastLED.show();
-  digitalWrite(ledPin,LOW);
-/*
-  for(int dot = 0; dot < NUM_LEDS; dot++) { 
-    leds[dot].blue = 255;
-    FastLED.show();
-    // clear this led for the next time around the loop
-    leds[dot] = CRGB::Black;
-    delay(30);
-}
-*/
+  FastLED.show();
 }
 void array_to_string(byte array[], unsigned int len, char buffer[])
 {
@@ -86,23 +66,66 @@ void array_to_string(byte array[], unsigned int len, char buffer[])
 
 void showNewData() {
     if (newData == true) {
+        int i,k;
+        /*
         gotoXY(0,0);
         LcdString ("RX:");
         char str[32] = "";// too many to print all 182
         array_to_string(receivedBytes, numReceived, str);
         LcdString(str);
+        */
         newData = false;
         // Set R,G,B for all leds (NUM_LEDS)
+        // First byte states what part of data is received
+        k = 0;
+        switch (receivedBytes[0]) {
+          case 1:
+          k = 0;
+          // first bit is startmarker, second is for switch
+            for (i = 1; i < numBytes-2; i++){
+                leds[k].red = receivedBytes[i];
+                k++;
+            }
+            break;
+          case 2:
+            k = 0;
+            for (i = 1; i < numBytes-2; i++){
+                leds[k + (numBytes-3)].blue = receivedBytes[i];
+                k++;
+            }
+            break;
+          case 3:
+            k = 0;
+            for (i = 1; i < numBytes-2; i++){
+                leds[k + 2*(numBytes-3)].green = receivedBytes[i];
+                k++;
+            }
+            break;
+          case 4:
+            k = 0;
+            for (i = 1; i < numBytes-2; i++){
+                leds[k + 3*(numBytes-3)].blue = receivedBytes[i];
+                k++;
+            }
+            break;
+          default:
+            int a = 0;
+            // statements
+            return;
+        }
+        /*
         for(int dot = 0; dot < numReceived; dot++) { 
           leds[dot].blue = receivedBytes[dot];
         }
-        FastLED.show();
-        delay(100);
-        FastLED.clear();
-        FastLED.show();
+        */
+        //delay(100);
     } else {
+      FastLED.clear();
+      /*
       gotoXY(0,0);
       LcdString("nothing");
+      */
+      //delay(100);
     }
 }
 
@@ -119,16 +142,19 @@ void recvBytesWithStartEndMarkers() {
             if (rb == startMarker) {
               recvInProgress = true;
               numReceived = 0;
+              ndx = 0;
               newData = false;
-              return;
+            } else if (ndx >= numBytes-2) {
+              newData = true;
             } else if (rb != endMarker) {
               receivedBytes[ndx] = rb;
               ndx++;
+              /*
               if (ndx >= numBytes) {
                   ndx = numBytes - 1;
               }
-            }
-            else {
+              */
+            } else {
                 receivedBytes[ndx] = '\0'; // terminate the string
                 recvInProgress = false;
                 numReceived = ndx;  // save the number for use when printing

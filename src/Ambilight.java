@@ -56,9 +56,6 @@ class ambilight {
             averageRGB(red,blue,green,LED_DATA);
           
             System.out.println("Width: "+width+" height: "+height);
-            //System.out.println("blue: "+ Integer.toBinaryString(blue[0][100]));
-     		// loop over the circumference of the image and do an averaging that is dependent on the number of neopixels
-     		//https://www.tutorialspoint.com/java_dip/java_buffered_image.htm
      		// neopixels width: 30
             // neopixels height: 15
             // pixel width: 1920
@@ -68,15 +65,28 @@ class ambilight {
             for (int i = 1;i<181;i++) {
             	LED_DATA[i] = (byte)255;
             }
-            int b;
             while(true) {
                 //int message = 255;
                 //byte lower =(byte)(message & 0xFF); //Get the lower 8bits
-                byte MESSAGE_START_FULL[] = {startMarker, (byte)255,(byte)0,0x03,0x04,0x05,0x06,0x07,0x08,0x09,0x10,0x11,0x12,0x13,0x14,0x15,0x16,0x17,0x18,0x19,0x20,0x21,0x22,0x23,0x24,0x25,0x26,0x27,0x28,0x29,0x30,endMarker};
+                //byte MESSAGE_START_FULL[] = {startMarker, (byte)255,(byte)0,0x03,0x04,0x05,0x06,0x07,0x08,0x09,0x10,0x11,0x12,0x13,0x14,0x15,0x16,0x17,0x18,0x19,0x20,0x21,0x22,0x23,0x24,0x25,0x26,0x27,0x28,0x29,0x30,endMarker};
                 //com.getSerialOutputStream().write(MESSAGE_START_FULL);
-                b = LED_DATA.length;
-                com.getSerialOutputStream().write(LED_DATA);
+                int len = 18;
+                int offset = 0;
+                LED_DATA[1]=(byte)1;
+                LED_DATA[len - 1]=endMarker;
+                com.getSerialOutputStream().write(LED_DATA,offset,len);
                 
+                LED_DATA[1]=(byte)2;
+                LED_DATA[len - 1]=endMarker;
+                com.getSerialOutputStream().write(LED_DATA,offset,len);
+                
+                LED_DATA[1]=(byte)3;
+                LED_DATA[len - 1]=endMarker;
+                com.getSerialOutputStream().write(LED_DATA,offset,len);
+                
+                LED_DATA[1]=(byte)4;
+                LED_DATA[len - 1]=endMarker;
+                com.getSerialOutputStream().write(LED_DATA,offset,len);
             }
             //com.disconnect();
         } catch (Exception e) {
@@ -186,8 +196,6 @@ class ambilight {
         	LED_DATA[k] = (byte)B_avg[1][i];
         	k++;
         }
-        
-        
         double endTime = System.nanoTime();
         System.out.println("Time averaging:");
         System.out.printf("%f", (double)((endTime - startTime)/1000000));
