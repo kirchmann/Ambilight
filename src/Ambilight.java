@@ -14,7 +14,6 @@ class ambilight {
 	static int NEOPIXEL_HEIGHT = 15;
 	static int NEOPIXELS_SUM = 2*NEOPIXEL_HEIGHT + NEOPIXEL_WIDTH;
     public static void main(String[] args) throws IOException {
-        System.out.println("Hello World!"); // Display the string.
         Robot robot;
         SerialComm com = new SerialComm();
         com.ConnectPort(115200, "COM3");
@@ -22,7 +21,7 @@ class ambilight {
         	robot = new Robot();
         	Rectangle area = new Rectangle(Toolkit.getDefaultToolkit().getScreenSize()); 
      		BufferedImage bi = robot.createScreenCapture(area);
-     		System.out.println("screensize: "+ Toolkit.getDefaultToolkit().getScreenSize()); // Display the string.
+     		//System.out.println("screensize: "+ Toolkit.getDefaultToolkit().getScreenSize()); // Display the string.
      		//final byte[] pixels = ((DataBufferByte) bi.getRaster().getDataBuffer()).getData();
             final int width  = bi.getWidth();
             final int height = bi.getHeight();
@@ -62,9 +61,12 @@ class ambilight {
             // pixel height: 1080
             // 1920/4/30 = 16
             // 1080/4/15 = 9
+            
+            /*
             for (int i = 1;i<181;i++) {
             	LED_DATA[i] = (byte)255;
             }
+            */
             while(true) {
                 //int message = 255;
                 //byte lower =(byte)(message & 0xFF); //Get the lower 8bits
@@ -73,9 +75,10 @@ class ambilight {
                 int len = 18;
                 int offset = 0;
                 LED_DATA[1]=(byte)1;
-                LED_DATA[len - 1]=endMarker;
-                com.getSerialOutputStream().write(LED_DATA,offset,len);
-                
+                //LED_DATA[len - 1]=endMarker;
+                com.getSerialOutputStream().write(LED_DATA);
+                //com.getSerialOutputStream().write(LED_DATA,offset,len);
+                /*
                 LED_DATA[1]=(byte)2;
                 LED_DATA[len - 1]=endMarker;
                 com.getSerialOutputStream().write(LED_DATA,offset,len);
@@ -87,6 +90,7 @@ class ambilight {
                 LED_DATA[1]=(byte)4;
                 LED_DATA[len - 1]=endMarker;
                 com.getSerialOutputStream().write(LED_DATA,offset,len);
+                */
             }
             //com.disconnect();
         } catch (Exception e) {

@@ -18,20 +18,11 @@
 
 const int NUM_LEDS = 60; // Number of leds, 15 + 30 + 15
 CRGB leds[NUM_LEDS];
-
-const byte numBytes = 18; //NUM_LEDS*3 (R,G and B -> 3)
+const int ledPin = 13;
+const byte numBytes = 180; //NUM_LEDS*3 (R,G and B -> 3)
 byte receivedBytes[numBytes];
 byte numReceived = 0;
-
 boolean newData = false;
-
-int red_side[2][16];
-byte red_top[30];
-int green_side[2][16];
-int green_top[30];
-int blue_side[2][16];
-int blue_top[30];
-
 
 void setup() {
   // initialize serial:
@@ -39,93 +30,55 @@ void setup() {
   FastLED.addLeds<WS2812B, 7, GRB>(leds, NUM_LEDS);
   LcdInitialise();
   LcdClear();
+  gotoXY(0,0);
   LcdString ("Starting");
-  gotoXY(24,3);
-  delay(10);
+  delay(1000);
+  LcdClear();
+  pinMode(ledPin, OUTPUT);
+ digitalWrite(ledPin,LOW);
 }
 
 void loop() {
-  // print the string when a newline arrives:
   int i;
   //LcdClear();
   showNewData();
   recvBytesWithStartEndMarkers();
-  FastLED.show();
-}
-void array_to_string(byte array[], unsigned int len, char buffer[])
-{
-    for (unsigned int i = 0; i < len; i++)
-    {
-        byte nib1 = (array[i] >> 4) & 0x0F;
-        byte nib2 = (array[i] >> 0) & 0x0F;
-        buffer[i*2+0] = nib1  < 0xA ? '0' + nib1  : 'A' + nib1  - 0xA;
-        buffer[i*2+1] = nib2  < 0xA ? '0' + nib2  : 'A' + nib2  - 0xA;
-    }
-    buffer[len*2] = '\0';
 }
 
 void showNewData() {
     if (newData == true) {
-        int i,k;
-        /*
-        gotoXY(0,0);
-        LcdString ("RX:");
-        char str[32] = "";// too many to print all 182
-        array_to_string(receivedBytes, numReceived, str);
-        LcdString(str);
-        */
-        newData = false;
-        // Set R,G,B for all leds (NUM_LEDS)
-        // First byte states what part of data is received
-        k = 0;
-        switch (receivedBytes[0]) {
-          case 1:
-          k = 0;
-          // first bit is startmarker, second is for switch
-            for (i = 1; i < numBytes-2; i++){
-                leds[k].red = receivedBytes[i];
-                k++;
-            }
-            break;
-          case 2:
-            k = 0;
-            for (i = 1; i < numBytes-2; i++){
-                leds[k + (numBytes-3)].blue = receivedBytes[i];
-                k++;
-            }
-            break;
-          case 3:
-            k = 0;
-            for (i = 1; i < numBytes-2; i++){
-                leds[k + 2*(numBytes-3)].green = receivedBytes[i];
-                k++;
-            }
-            break;
-          case 4:
-            k = 0;
-            for (i = 1; i < numBytes-2; i++){
-                leds[k + 3*(numBytes-3)].blue = receivedBytes[i];
-                k++;
-            }
-            break;
-          default:
-            int a = 0;
-            // statements
-            return;
-        }
-        /*
-        for(int dot = 0; dot < numReceived; dot++) { 
-          leds[dot].blue = receivedBytes[dot];
-        }
-        */
-        //delay(100);
-    } else {
-      FastLED.clear();
       /*
       gotoXY(0,0);
-      LcdString("nothing");
+      LcdString("Received bytes #: ");
+      char cstr[16];
+      itoa(numReceived, cstr, 10);
+      LcdString(cstr);
+      digitalWrite(ledPin,HIGH);
+      digitalWrite(ledPin,LOW);
       */
-      //delay(100);
+      int i,k;
+      /*
+      gotoXY(0,0);
+      LcdString ("RX:");
+      char str[32] = "";// too many to print all 182
+      array_to_string(receivedBytes, numReceived, str);
+      LcdString(str);
+      */
+      
+      newData = false;
+      // Set R,G,B for all leds (NUM_LEDS)
+      // First byte states what part of data is received
+      for(k = 0; k < NUM_LEDS; k++) { 
+        leds[k].red   = receivedBytes[k];
+        leds[k].green = receivedBytes[NUM_LEDS + k];
+        leds[k].blue  = receivedBytes[2*NUM_LEDS + k];
+      }
+      FastLED.show();
+  } else {
+    FastLED.clear();
+    FastLED.show();
+    //gotoXY(0,0);
+    //LcdString("nothing");
     }
 }
 
@@ -144,32 +97,32 @@ void recvBytesWithStartEndMarkers() {
               numReceived = 0;
               ndx = 0;
               newData = false;
-            } else if (ndx >= numBytes-2) {
+            } else if (ndx == numBytes) {
+              receivedBytes[ndx] = '\0'; // terminate the string
+              recvInProgress = false;
+              numReceived = ndx;  // save the number for use when printing
               newData = true;
-            } else if (rb != endMarker) {
+            } else {
               receivedBytes[ndx] = rb;
               ndx++;
-              /*
-              if (ndx >= numBytes) {
-                  ndx = numBytes - 1;
-              }
-              */
-            } else {
-                receivedBytes[ndx] = '\0'; // terminate the string
-                recvInProgress = false;
-                numReceived = ndx;  // save the number for use when printing
-                ndx = 0;
-                if (numReceived==numBytes-2) {//only if number received is as expected set newData = true.
-                  newData = true;
-                } else {
-                  newData = false;  
-                }
             }
         }
         else if (rb == startMarker) {
             recvInProgress = true;
         }
     }
+}
+
+void array_to_string(byte array[], unsigned int len, char buffer[])
+{
+    for (unsigned int i = 0; i < len; i++)
+    {
+        byte nib1 = (array[i] >> 4) & 0x0F;
+        byte nib2 = (array[i] >> 0) & 0x0F;
+        buffer[i*2+0] = nib1  < 0xA ? '0' + nib1  : 'A' + nib1  - 0xA;
+        buffer[i*2+1] = nib2  < 0xA ? '0' + nib2  : 'A' + nib2  - 0xA;
+    }
+    buffer[len*2] = '\0';
 }
 
 static const byte ASCII[][5] =
