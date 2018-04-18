@@ -65,15 +65,38 @@ class ambilight {
 	                //com.getSerialOutputStream().write(MESSAGE_START_FULL);
 	                //int len = 18;
 	                //int offset = 0;
-	                LED_DATA[1]=(byte)1;
+	                LED_DATA[1]=(byte)(0x01);
 	                // Filter all except first occurrence of startMarker from LED_DATA
 	                for (int i = 1;i < messageSize;i++) {
 	                	if (LED_DATA[i] == startMarker) {
 	                		LED_DATA[i] = (byte) (startMarker + 0x01);
 	                	}
+	                	/*
+	                	if(i % 3 == 0) {
+	                		LED_DATA[i] = (byte) 0x00;
+	                	}
+	                	if((i + 1) % 3 == 0) {
+	                		LED_DATA[i] = (byte) 0x0F;
+	                	}
+	                	if((i + 2) % 3 == 0) {
+	                		LED_DATA[i] = (byte) 0x00;
+	                	}
+	                	*/
 	                }
 	                //LED_DATA[len - 1]=endMarker;
-	                com.getSerialOutputStream().write(LED_DATA);
+	                int testmessageSize = 30 + 2;
+		            byte[] TEST_DATA = new byte[testmessageSize];
+		            TEST_DATA[0] = startMarker;
+	                for (int i = 1;i < testmessageSize;i++) { 
+	                	TEST_DATA[i] = (byte) (100);
+	                	if((i + 2) % 3 == 0) {
+	                		TEST_DATA[i] = (byte) 0x00;
+	                	}
+	                }
+                	
+	                TEST_DATA[31] = endMarker;
+	                com.getSerialOutputStream().write(TEST_DATA);
+	                //com.getSerialOutputStream().write(LED_DATA);
             }
             //com.disconnect();
         } catch (Exception e) {
@@ -90,7 +113,7 @@ class ambilight {
         int x,y;
         int tBlue,tRed,tGreen;
         double startTime = System.nanoTime();
-        // Left side, go from bottom up
+        // Extract every fourth pixel value on left side of screen. Since it is the left side, go from bottom up
         for (y =  height - 4; y > 0; y -= 4) {
     		tColor = image.getRGB(i,y);
         	blue[k] = (tColor & 0xff);
@@ -123,9 +146,19 @@ class ambilight {
     	int[] R_avg = new int[NEOPIXELS_SUM];
         int[] G_avg = new int[NEOPIXELS_SUM];
         int[] B_avg = new int[NEOPIXELS_SUM];
+        int section_heigth = HEIGHT/NEOPIXEL_HEIGHT;
+        int section_width = WIDTH/NEOPIXEL_WIDTH;
         int i,k;
         int sum_R,sum_G,sum_B;
         double startTime = System.nanoTime();
+        k = 0;
+        for (i = 0; i < NEOPIXELS_SUM;i++) {
+        	sum_R = 0;sum_G=0;sum_B=0;
+        	for (k = 0;k < 10; k++) {
+        		sum_R = sum_R + red[1];
+        	}
+        }
+                
         k = 1; // First bit will be message start bit
         for ( i = 0; i < NEOPIXELS_SUM; i++) {
         	LED_DATA[k] = (byte)R_avg[i];

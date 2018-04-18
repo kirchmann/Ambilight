@@ -16,10 +16,10 @@
 // LED PINS
 #define DATA_PIN 7;    // data pin to neopixels, Green: datapin, white: GND, red: power (5V)
 
-const int NUM_LEDS = 60; // Number of leds, 15 + 30 + 15
+const int NUM_LEDS = 10;//60; // Number of leds, 15 + 30 + 15
 CRGB leds[NUM_LEDS];
 const int ledPin = 13;
-const byte numBytes = 180; //NUM_LEDS*3 (R,G and B -> 3)
+const byte numBytes = 31;//180 //NUM_LEDS*3 (R,G and B -> 3)
 byte receivedBytes[numBytes];
 byte numReceived = 0;
 boolean newData = false;
@@ -35,79 +35,99 @@ void setup() {
   delay(1000);
   LcdClear();
   pinMode(ledPin, OUTPUT);
- digitalWrite(ledPin,LOW);
+  digitalWrite(ledPin,LOW);
+  FastLED.setBrightness(64);
 }
 
 void loop() {
   int i;
-  //LcdClear();
+  LcdClear();
+  gotoXY(0,0);
   showNewData();
-  recvBytesWithStartEndMarkers();
+  recvWithStartEndMarkers();
 }
 
 void showNewData() {
-    if (newData == true) {
-      /*
-      gotoXY(0,0);
-      LcdString("Received bytes #: ");
-      char cstr[16];
-      itoa(numReceived, cstr, 10);
-      LcdString(cstr);
-      digitalWrite(ledPin,HIGH);
-      digitalWrite(ledPin,LOW);
-      */
-      int i,k;
-      /*
-      gotoXY(0,0);
-      LcdString ("RX:");
-      char str[32] = "";// too many to print all 182
-      array_to_string(receivedBytes, numReceived, str);
-      LcdString(str);
-      */
-      
-      newData = false;
-      // Set R,G,B for all leds (NUM_LEDS)
-      // First byte states what part of data is received
-      for(k = 0; k < NUM_LEDS; k++) { 
-        leds[k].red   = receivedBytes[k];
-        leds[k].green = receivedBytes[NUM_LEDS + k];
-        leds[k].blue  = receivedBytes[2*NUM_LEDS + k];
-      }
-      FastLED.show();
-  } else {
-    FastLED.clear();
-    FastLED.show();
-    //gotoXY(0,0);
-    //LcdString("nothing");
+  if (newData == true) {
+    /*gotoXY(0,0);
+    LcdString("Received bytes #: ");
+    char cstr[16];
+    itoa(numReceived, cstr, 10);
+    LcdString(cstr);
+    digitalWrite(ledPin,HIGH);
+    LcdString ("got all data");
+    digitalWrite(ledPin,LOW);
+    */
+    digitalWrite(ledPin,HIGH);
+
+    int i,k;
+/*
+    gotoXY(0,0);
+    LcdString ("RX:");
+    char str[32] = "";// too many to print all 182
+    array_to_string(receivedBytes, numReceived, str);
+    LcdString(str);
+  */  
+    newData = false;
+    // Set R,G,B for all leds (NUM_LEDS)
+    // They arrive as: R,G,B,R,G,B,R,G,B
+    // I believe the first 15 LEDS are set in incorrect order 
+    // Tried sending constant data from Java, it does not work well. Need to send less data at a time? more startmarkers
+    // Works good with 32 bytes (startmarker + data for 10 LEDS + endmarker)
+    i = 0;
+    for(k = 0; k < NUM_LEDS; k++) { 
+      leds[k].red   = receivedBytes[i];
+      leds[k].green = receivedBytes[i + 1];
+      leds[k].blue  = receivedBytes[i + 2];
+      i = i+3;
     }
+    FastLED.setBrightness(64);
+    FastLED.show();
+    digitalWrite(ledPin,LOW);
+    //delay(10);
+} else {
+  FastLED.clear();
+  FastLED.show();
+  //delay(10);
+  int c = 10;
+/*
+  LcdString("Received bytes #: ");
+  char cstr[16];
+  itoa(numReceived, cstr, 10);
+  LcdString(cstr);
+  */
+  }
 }
 
-void recvBytesWithStartEndMarkers() {
+void recvWithStartEndMarkers() {
     static boolean recvInProgress = false;
-    static byte ndx = 0;
+    int index = 0;
     byte startMarker = 0x3C;
     byte endMarker = 0x3E;
-    byte rb;
+
+    byte rc;
+
+ // if (Serial.available() > 0) {
     while (Serial.available() > 0 && newData == false) {
-        rb = Serial.read();
+        rc = Serial.read();
+
         if (recvInProgress == true) {
-            // Received startmarker although it was already receiving, means something is wrong.
-            if (rb == startMarker) {
-              recvInProgress = true;
-              numReceived = 0;
-              ndx = 0;
-              newData = false;
-            } else if (ndx == numBytes) {
-              receivedBytes[ndx] = '\0'; // terminate the string
-              recvInProgress = false;
-              numReceived = ndx;  // save the number for use when printing
-              newData = true;
-            } else {
-              receivedBytes[ndx] = rb;
-              ndx++;
+            if (rc != endMarker) {
+                receivedBytes[index] = rc;
+                index++;
+                if (index >= numBytes) {
+                    index = numBytes - 1;
+                }
+            }
+            else {
+                receivedBytes[index] = '\0'; // terminate the string
+                recvInProgress = false;
+                index = 0;
+                newData = true;
             }
         }
-        else if (rb == startMarker) {
+
+        else if (rc == startMarker) {
             recvInProgress = true;
         }
     }
