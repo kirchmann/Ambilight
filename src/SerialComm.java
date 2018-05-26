@@ -45,11 +45,6 @@ public class SerialComm {
 			throw new IOException("Port in use.");
 		}
         outStream = serialPort.getOutputStream();
-        //String serialMessage = "a\n";
-        
-        
-        //outStream.close();
-        //serialPort.close();
 	}
 
 	
@@ -70,8 +65,6 @@ public class SerialComm {
         {
         	outStream.write(data);
         	outStream.flush();
-            
-          
         }
         catch (Exception e)
         {
