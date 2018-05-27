@@ -21,63 +21,41 @@ class Ambilight {
 	static int RECT_TOP_WIDTH = SCREEN_WIDTH/NEOPIXELS_WIDTH;
 	static int PREAMBLE_LENGTH = 10;
 	static int messageSize = NEOPIXELS_SUM*3 + PREAMBLE_LENGTH;
+	static int BYTESPERLED = 3;
 	SerialComm ComPort;
 	BufferedImage bufferedImage;
 	Rectangle areaForScreenShot;
 	Robot robot;
 	byte[] LED_DATA;
+	Color colorOfCurrentRectangle;
 
 	
     public static void main(String[] args) throws IOException {
-        Robot robot;
         Ambilight ambilight = new Ambilight();
         ambilight.ComPort = new SerialComm();
-        // list all COM in GUI, ask GUI for COM drop down choice
+        // list all COM in GUI, ask GUI for COM drop down choice?
         ambilight.ComPort.ConnectPort(115200, "COM4");
     	ambilight.createInstanceOfRobot();
     	ambilight.areaForScreenShot = new Rectangle(Toolkit.getDefaultToolkit().getScreenSize()); 
     	while(true) {
-    		System.out.println("In loop");
     		// 0,0 in upper left triangle
      		ambilight.bufferedImage = ambilight.robot.createScreenCapture(ambilight.areaForScreenShot);
             ambilight.LED_DATA = new byte[messageSize];
-            Color temp;
-            // many magic numbers here, needs to be fixed
-            int k = 9 + 3*NEOPIXELS_HEIGHT;
-            int j = k + 1 + 3*NEOPIXELS_WIDTH;
+            int k = PREAMBLE_LENGTH;
+            int j = PREAMBLE_LENGTH + BYTESPERLED*NEOPIXELS_HEIGHT + BYTESPERLED*NEOPIXELS_WIDTH;
             for (int i = 0; i < NEOPIXELS_HEIGHT; i++) {
-            	// make three separate functions? One for left, one for top and one for right side.
-            	temp = ambilight.getAvgColorRect(0, (i)*NEOPIXEL_AVG_RECT_SIDE_HEIGHT, RECT_SIDE_WIDTH, NEOPIXEL_AVG_RECT_SIDE_HEIGHT);
-            	//int test = temp.getBlue();
-            	// Inverted order for this part since it goes from up to down.
-            	ambilight.LED_DATA[k] = (byte) temp.getRed();
-            	ambilight.LED_DATA[k - 1] = (byte) temp.getGreen();
-            	ambilight.LED_DATA[k - 2] = (byte) temp.getBlue();
-            	int test5 = temp.getBlue();
-            	byte test3b = (byte) test5;
-            	int test6 = temp.getRed();
-            	byte test6b = (byte) test6;
-            	k = k - 3;
-            	temp = ambilight.getAvgColorRect(SCREEN_WIDTH-RECT_SIDE_WIDTH, (i)*NEOPIXEL_AVG_RECT_SIDE_HEIGHT, RECT_SIDE_WIDTH, NEOPIXEL_AVG_RECT_SIDE_HEIGHT);
-            	int test2 = temp.getBlue();
-            	byte test2b = (byte) test2;
-            	ambilight.LED_DATA[j] = (byte) temp.getBlue();
-            	int test3 = temp.getGreen();
-            	ambilight.LED_DATA[j + 1] = (byte) temp.getGreen();
-            	int test4 = temp.getRed();
-            	ambilight.LED_DATA[j + 2] = (byte) temp.getRed();
-            	j = j + 3;
+            	ambilight.getAvgColorOfSideRectangle(0, SCREEN_HEIGHT - (i + 1)*NEOPIXEL_AVG_RECT_SIDE_HEIGHT);
+            	ambilight.setLEDdata(k);
+            	k = k + BYTESPERLED;
+            	ambilight.getAvgColorOfSideRectangle(SCREEN_WIDTH - RECT_SIDE_WIDTH, (i)*NEOPIXEL_AVG_RECT_SIDE_HEIGHT);
+            	ambilight.setLEDdata(j);
+            	j = j + BYTESPERLED;
             }
-            j = 10 + 3*NEOPIXELS_HEIGHT;
+            j = PREAMBLE_LENGTH + BYTESPERLED*NEOPIXELS_HEIGHT;
             for (int i = 0; i < NEOPIXELS_WIDTH; i++) {
-            	temp = ambilight.getAvgColorRect((i)*RECT_TOP_WIDTH, 0, RECT_TOP_WIDTH, RECT_TOP_HEIGHT);
-            	int test2 = temp.getBlue();
-            	ambilight.LED_DATA[j] = (byte) temp.getBlue();
-            	int test3 = temp.getGreen();
-            	ambilight.LED_DATA[j + 1] = (byte) temp.getGreen();
-            	int test4 = temp.getRed();
-            	ambilight.LED_DATA[j + 2] = (byte) temp.getRed();
-            	j = j + 3;
+            	ambilight.getAvgColorOfTopRectangle((i)*RECT_TOP_WIDTH);
+            	ambilight.setLEDdata(j);
+            	j = j + BYTESPERLED;
             }
             ambilight.bufferedImage.flush();
             ambilight.setMessagePreamble();
@@ -86,7 +64,16 @@ class Ambilight {
         //ambilight.ComPort.disconnect();
     }
     
-    private void createInstanceOfRobot() {
+
+
+	private void setLEDdata(int j) {
+		// TODO Auto-generated method stub
+    	LED_DATA[j] = (byte) this.colorOfCurrentRectangle.getBlue();
+    	LED_DATA[j + 1] = (byte) this.colorOfCurrentRectangle.getGreen();
+    	LED_DATA[j + 2] = (byte) this.colorOfCurrentRectangle.getRed();
+	}
+
+	private void createInstanceOfRobot() {
     	try {
 			robot = new Robot();
 		} catch (AWTException e) {
@@ -94,14 +81,13 @@ class Ambilight {
 			e.printStackTrace();
 		}
 	}
-
+  
 	/*
-     * (x0,y0) is your upper left coordinate, and (w,h)
-     * are your width and height respectively
+     * (x0,y0) is your upper left coordinate
      */
-    public Color getAvgColorRect(int x0, int y0, int w, int h) {
-        int x1 = x0 + w;
-        int y1 = y0 + h;
+    public void getAvgColorOfSideRectangle(int x0, int y0) {
+        int x1 = x0 + RECT_SIDE_WIDTH;
+        int y1 = y0 + NEOPIXEL_AVG_RECT_SIDE_HEIGHT;
         long sumRed = 0, sumGreen = 0, sumBlue = 0;
         for (int x = x0; x < x1; x++) {
             for (int y = y0; y < y1; y++) {
@@ -111,11 +97,24 @@ class Ambilight {
                 sumBlue += pixel.getBlue();
             }
         }
-        int num = w * h;
-        int test = (int)(sumRed / num);
-        return new Color((int)(sumRed / num), (int)(sumGreen / num), (int)(sumBlue / num));
+        int divisorForAveraging = RECT_SIDE_WIDTH * NEOPIXEL_AVG_RECT_SIDE_HEIGHT;
+        this.colorOfCurrentRectangle = new Color((int)(sumRed / divisorForAveraging), (int)(sumGreen / divisorForAveraging), (int)(sumBlue / divisorForAveraging));
     }
-    
+      private void getAvgColorOfTopRectangle(int x0) {
+    	  int x1 = x0 + RECT_TOP_WIDTH;
+          int y1 = RECT_TOP_HEIGHT;
+          long sumRed = 0, sumGreen = 0, sumBlue = 0;
+          for (int x = x0; x < x1; x++) {
+              for (int y = 0; y < y1; y++) {
+                  Color pixel = new Color(this.bufferedImage.getRGB(x, y));
+                  sumRed += pixel.getRed();
+                  sumGreen += pixel.getGreen();
+                  sumBlue += pixel.getBlue();
+              }
+          }
+          int divisorForAveraging = RECT_TOP_HEIGHT * RECT_TOP_HEIGHT;
+          this.colorOfCurrentRectangle = new Color((int)(sumRed / divisorForAveraging), (int)(sumGreen / divisorForAveraging), (int)(sumBlue / divisorForAveraging));
+	}
     private void setMessagePreamble() {
         LED_DATA[0] = (byte)0x00;
         LED_DATA[1] = (byte)0x01;
