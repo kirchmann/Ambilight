@@ -41,37 +41,15 @@ class Ambilight {
     		// 0,0 in upper left triangle
      		ambilight.bufferedImage = ambilight.robot.createScreenCapture(ambilight.areaForScreenShot);
             ambilight.LED_DATA = new byte[messageSize];
-            int k = PREAMBLE_LENGTH;
-            int j = PREAMBLE_LENGTH + BYTESPERLED*NEOPIXELS_HEIGHT + BYTESPERLED*NEOPIXELS_WIDTH;
-            for (int i = 0; i < NEOPIXELS_HEIGHT; i++) {
-            	ambilight.getAvgColorOfSideRectangle(0, SCREEN_HEIGHT - (i + 1)*NEOPIXEL_AVG_RECT_SIDE_HEIGHT);
-            	ambilight.setLEDdata(k);
-            	k = k + BYTESPERLED;
-            	ambilight.getAvgColorOfSideRectangle(SCREEN_WIDTH - RECT_SIDE_WIDTH, (i)*NEOPIXEL_AVG_RECT_SIDE_HEIGHT);
-            	ambilight.setLEDdata(j);
-            	j = j + BYTESPERLED;
-            }
-            j = PREAMBLE_LENGTH + BYTESPERLED*NEOPIXELS_HEIGHT;
-            for (int i = 0; i < NEOPIXELS_WIDTH; i++) {
-            	ambilight.getAvgColorOfTopRectangle((i)*RECT_TOP_WIDTH);
-            	ambilight.setLEDdata(j);
-            	j = j + BYTESPERLED;
-            }
+            ambilight.calcColorOfSideRectangles();
+            ambilight.calcColorOfTopRectangles();
             ambilight.bufferedImage.flush();
             ambilight.setMessagePreamble();
-            ambilight.ComPort.getSerialOutputStream().write(ambilight.LED_DATA);
+            ambilight.ComPort.writeLedData(ambilight.LED_DATA);
         }
         //ambilight.ComPort.disconnect();
     }
     
-
-
-	private void setLEDdata(int j) {
-		// TODO Auto-generated method stub
-    	LED_DATA[j] = (byte) this.colorOfCurrentRectangle.getBlue();
-    	LED_DATA[j + 1] = (byte) this.colorOfCurrentRectangle.getGreen();
-    	LED_DATA[j + 2] = (byte) this.colorOfCurrentRectangle.getRed();
-	}
 
 	private void createInstanceOfRobot() {
     	try {
@@ -82,10 +60,35 @@ class Ambilight {
 		}
 	}
   
+	private void calcColorOfSideRectangles() {
+        int k = PREAMBLE_LENGTH;
+        int j = PREAMBLE_LENGTH + BYTESPERLED*NEOPIXELS_HEIGHT + BYTESPERLED*NEOPIXELS_WIDTH;
+        for (int i = 0; i < NEOPIXELS_HEIGHT; i++) {
+        	this.getAvgColorOfSideRectangle(0, SCREEN_HEIGHT - (i + 1)*NEOPIXEL_AVG_RECT_SIDE_HEIGHT);
+        	this.setLEDdata(k);
+        	k = k + BYTESPERLED;
+        	this.getAvgColorOfSideRectangle(SCREEN_WIDTH - RECT_SIDE_WIDTH, (i)*NEOPIXEL_AVG_RECT_SIDE_HEIGHT);
+        	this.setLEDdata(j);
+        	j = j + BYTESPERLED;
+        }
+	}
+	
+	private void calcColorOfTopRectangles() {
+		int j = PREAMBLE_LENGTH + BYTESPERLED*NEOPIXELS_HEIGHT;
+	    for (int i = 0; i < NEOPIXELS_WIDTH; i++) {
+	    	this.getAvgColorOfTopRectangle((i)*RECT_TOP_WIDTH);
+	    	this.setLEDdata(j);
+	    	j = j + BYTESPERLED;
+	    }
+
+	}	
+	
+    	
+	
 	/*
      * (x0,y0) is your upper left coordinate
      */
-    public void getAvgColorOfSideRectangle(int x0, int y0) {
+    private void getAvgColorOfSideRectangle(int x0, int y0) {
         int x1 = x0 + RECT_SIDE_WIDTH;
         int y1 = y0 + NEOPIXEL_AVG_RECT_SIDE_HEIGHT;
         long sumRed = 0, sumGreen = 0, sumBlue = 0;
@@ -115,6 +118,14 @@ class Ambilight {
           int divisorForAveraging = RECT_TOP_HEIGHT * RECT_TOP_HEIGHT;
           this.colorOfCurrentRectangle = new Color((int)(sumRed / divisorForAveraging), (int)(sumGreen / divisorForAveraging), (int)(sumBlue / divisorForAveraging));
 	}
+      
+  	private void setLEDdata(int j) {
+		// TODO Auto-generated method stub
+    	LED_DATA[j] = (byte) this.colorOfCurrentRectangle.getBlue();
+    	LED_DATA[j + 1] = (byte) this.colorOfCurrentRectangle.getGreen();
+    	LED_DATA[j + 2] = (byte) this.colorOfCurrentRectangle.getRed();
+	}
+      
     private void setMessagePreamble() {
         LED_DATA[0] = (byte)0x00;
         LED_DATA[1] = (byte)0x01;
