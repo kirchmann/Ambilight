@@ -1,10 +1,10 @@
 #include "FastLED.h"
 
-#define NUM_LEDS (20)
-#define LED_DATA_PIN 7
+#define NUM_LEDS (60)
+#define LED_DATA_PIN 7 // data pin to neopixels, Green: datapin, white: GND, red: power (5V)
 #define NUM_BYTES (NUM_LEDS*3) // 3 colors  
 
-#define BRIGHTNESS 32
+#define BRIGHTNESS 200
 #define UPDATES_PER_SECOND 60
 
 #define TIMEOUT 3000
