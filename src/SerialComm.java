@@ -34,7 +34,6 @@ public class SerialComm {
         } catch (UnsupportedCommOperationException e) {
             throw new IOException("Unsupported serial port parameter");
         } catch (NoSuchPortException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		} catch (PortInUseException e) {
 			throw new IOException("Port in use.");

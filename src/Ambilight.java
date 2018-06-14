@@ -10,6 +10,7 @@ import java.io.IOException;
  *
  */
 class Ambilight {
+	// TODO Move all calculations to separate class?
 	static int SCREEN_HEIGHT = 1080;
 	static int SCREEN_WIDTH = 1920;
 	static int NEOPIXELS_WIDTH = 28;
@@ -40,7 +41,7 @@ class Ambilight {
      		ambilight.takeScreenshot();
             ambilight.calcColorOfSideRectangles();
             ambilight.calcColorOfTopRectangles();
-            ambilight.bufferedImage.flush();
+            ambilight.flushBufferedImage();
             ambilight.sendDataToCompPort();
             long endTime = System.nanoTime();
     		long duration = (endTime - startTime)/1000000;  //divide by 1000000 to get milliseconds.
@@ -61,7 +62,6 @@ class Ambilight {
     	try {
 			this.ComPort.ConnectPort(115200, "COM4");
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		} 
     }
@@ -74,7 +74,6 @@ class Ambilight {
     	try {
 			this.robot = new Robot();
 		} catch (AWTException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 	}
@@ -84,6 +83,10 @@ class Ambilight {
 	
 	public void sendDataToCompPort() {
 		this.ComPort.writeLedData(this.LED_DATA);
+	}
+	
+	public void flushBufferedImage() {
+		this.bufferedImage.flush();
 	}
 	
 	private void calcColorOfSideRectangles() {
@@ -146,7 +149,6 @@ class Ambilight {
 	}
       
   	private void setLEDdata(int j) {
-		// TODO Auto-generated method stub
     	LED_DATA[j] = (byte) this.colorOfCurrentRectangle.getBlue();
     	LED_DATA[j + 1] = (byte) this.colorOfCurrentRectangle.getGreen();
     	LED_DATA[j + 2] = (byte) this.colorOfCurrentRectangle.getRed();
