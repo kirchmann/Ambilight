@@ -23,7 +23,7 @@ public class SerialComm {
         try {
             CommPortIdentifier portId = CommPortIdentifier.getPortIdentifier(ComPort);
             System.out.println("Found port: "+portId.getName());
-            serialPort = (SerialPort) portId.open("Demo application", 5000);
+            serialPort = (SerialPort) portId.open("Ambilight", 5000);
             try {
 				Thread.sleep(4000);
 			} catch (InterruptedException e) {
@@ -31,7 +31,6 @@ public class SerialComm {
 			}
 			serialPort.setSerialPortParams(115200,SerialPort.DATABITS_8,SerialPort.STOPBITS_1,SerialPort.PARITY_NONE);
             serialPort.setFlowControlMode(SerialPort.FLOWCONTROL_NONE);
-
         } catch (UnsupportedCommOperationException e) {
             throw new IOException("Unsupported serial port parameter");
         } catch (NoSuchPortException e) {

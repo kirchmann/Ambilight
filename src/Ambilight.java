@@ -22,44 +22,70 @@ class Ambilight {
 	static int PREAMBLE_LENGTH = 10;
 	static int messageSize = NEOPIXELS_SUM*3 + PREAMBLE_LENGTH;
 	static int BYTESPERLED = 3;
-	SerialComm ComPort;
-	BufferedImage bufferedImage;
-	Rectangle areaForScreenShot;
-	Robot robot;
-	byte[] LED_DATA;
-	Color colorOfCurrentRectangle;
+	private SerialComm ComPort;
+	private BufferedImage bufferedImage;
+	private Rectangle areaForScreenShot;
+	private Robot robot;
+	private byte[] LED_DATA;
+	private Color colorOfCurrentRectangle;
 
 	
     public static void main(String[] args) throws IOException {
         Ambilight ambilight = new Ambilight();
-        ambilight.ComPort = new SerialComm();
+        ambilight.initialize();
         // list all COM in GUI, ask GUI for COM drop down choice?
-        ambilight.ComPort.ConnectPort(115200, "COM4");
-    	ambilight.createInstanceOfRobot();
-    	ambilight.areaForScreenShot = new Rectangle(Toolkit.getDefaultToolkit().getScreenSize()); 
     	while(true) {
+    		long startTime = System.nanoTime();
     		// 0,0 in upper left triangle
-     		ambilight.bufferedImage = ambilight.robot.createScreenCapture(ambilight.areaForScreenShot);
-            ambilight.LED_DATA = new byte[messageSize];
+     		ambilight.takeScreenshot();
             ambilight.calcColorOfSideRectangles();
             ambilight.calcColorOfTopRectangles();
             ambilight.bufferedImage.flush();
-            ambilight.setMessagePreamble();
-            ambilight.ComPort.writeLedData(ambilight.LED_DATA);
+            ambilight.sendDataToCompPort();
+            long endTime = System.nanoTime();
+    		long duration = (endTime - startTime)/1000000;  //divide by 1000000 to get milliseconds.
+    		int asdasd = 5;
         }
         //ambilight.ComPort.disconnect();
     }
+    public void initialize() {
+        this.connectComPort();
+        this.createInstanceOfRobot();
+        this.setAreaForScreenshot();
+        this.LED_DATA = new byte[messageSize];
+        this.setMessagePreamble(); // Won't ever be overwritten.
+    }
     
-
+    private void connectComPort() {
+    	this.ComPort = new SerialComm();
+    	try {
+			this.ComPort.ConnectPort(115200, "COM4");
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} 
+    }
+    
+    private void setAreaForScreenshot() {
+    	this.areaForScreenShot = new Rectangle(Toolkit.getDefaultToolkit().getScreenSize()); 
+    }
+    
 	private void createInstanceOfRobot() {
     	try {
-			robot = new Robot();
+			this.robot = new Robot();
 		} catch (AWTException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 	}
-  
+	private void takeScreenshot() {
+		this.bufferedImage = this.robot.createScreenCapture(this.areaForScreenShot);
+	}
+	
+	public void sendDataToCompPort() {
+		this.ComPort.writeLedData(this.LED_DATA);
+	}
+	
 	private void calcColorOfSideRectangles() {
         int k = PREAMBLE_LENGTH;
         int j = PREAMBLE_LENGTH + BYTESPERLED*NEOPIXELS_HEIGHT + BYTESPERLED*NEOPIXELS_WIDTH;
