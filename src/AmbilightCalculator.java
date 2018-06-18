@@ -9,7 +9,7 @@ public class AmbilightCalculator {
 	static int NEOPIXELS_SUM = 2*NEOPIXELS_HEIGHT + NEOPIXELS_WIDTH;
 	static int NEOPIXEL_AVG_RECT_SIDE_HEIGHT = SCREEN_HEIGHT/NEOPIXELS_HEIGHT;
 	static int RECT_SIDE_WIDTH = 80;
-	static int RECT_TOP_HEIGHT = 80;
+	static int RECT_TOP_HEIGHT = 70;
 	static int RECT_TOP_WIDTH = SCREEN_WIDTH/NEOPIXELS_WIDTH;
 	static int PREAMBLE_LENGTH = 10;
 	int messageSize = NEOPIXELS_SUM*3 + PREAMBLE_LENGTH;
@@ -57,8 +57,8 @@ public class AmbilightCalculator {
         int x1 = x0 + RECT_SIDE_WIDTH;
         int y1 = y0 + NEOPIXEL_AVG_RECT_SIDE_HEIGHT;
         long sumRed = 0, sumGreen = 0, sumBlue = 0;
-        for (int x = x0; x < x1; x++) {
-            for (int y = y0; y < y1; y++) {
+        for (int x = x0; x < x1; x+=2) {
+            for (int y = y0; y < y1; y+=2) {
                 Color pixel = new Color(this.bufferedImage.getRGB(x, y));
                 sumRed += pixel.getRed();
                 sumGreen += pixel.getGreen();
@@ -72,8 +72,8 @@ public class AmbilightCalculator {
     	  int x1 = x0 + RECT_TOP_WIDTH;
           int y1 = RECT_TOP_HEIGHT;
           long sumRed = 0, sumGreen = 0, sumBlue = 0;
-          for (int x = x0; x < x1; x++) {
-              for (int y = 0; y < y1; y++) {
+          for (int x = x0; x < x1; x+=2) {
+              for (int y = 0; y < y1; y+=2) {
                   Color pixel = new Color(this.bufferedImage.getRGB(x, y));
                   sumRed += pixel.getRed();
                   sumGreen += pixel.getGreen();
