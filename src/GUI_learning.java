@@ -15,6 +15,7 @@ public class GUI_learning {
 	private JFrame frame;
 	private JTextField updatesPerSecondTextField;
 	private JLabel updatesPerSecondTextField_label;
+	private boolean isRunning;
 
 	/**
 	 * Launch the application.
@@ -47,21 +48,25 @@ public class GUI_learning {
 	private void initialize() {
 		frame = new JFrame();
 		frame.setBounds(100, 100, 450, 300);
+		this.isRunning = false;
         Ambilight ambilight = new Ambilight();
         ambilight.initialize();
         Runnable ambilightRunnable = new Runnable() {
             public void run() {
-              long startTime = System.nanoTime();
-              ambilight.takeScreenshot();
-              ambilight.calculateColorOfAllLEDs();
-              ambilight.flushBufferedImage();
-              ambilight.sendDataToCompPort();
-              long endTime = System.nanoTime();
-              long duration = (endTime - startTime)/1000000;  //divide by 1000000 to get milliseconds.
-              System.out.println(duration);
+            	if (isRunning) {
+	              long startTime = System.nanoTime();
+	              ambilight.takeScreenshot();
+	              ambilight.calculateColorOfAllLEDs();
+	              ambilight.flushBufferedImage();
+	              ambilight.sendDataToCompPort();
+	              long endTime = System.nanoTime();
+	              long duration = (endTime - startTime)/1000000;  //divide by 1000000 to get milliseconds.
+	              System.out.println(duration);
+            	}
             }
           };
-
+        ScheduledExecutorService ambilightThread = Executors.newSingleThreadScheduledExecutor();
+        ambilightThread.scheduleAtFixedRate(ambilightRunnable, 0, 100, TimeUnit.MILLISECONDS);
 		JCheckBox OnOrOffButton = new JCheckBox("On/off");
 		OnOrOffButton.setBounds(20, 57, 69, 72);
 		OnOrOffButton.addActionListener(new ActionListener() {
@@ -70,13 +75,12 @@ public class GUI_learning {
 		        JCheckBox cb = (JCheckBox) event.getSource();
 		        if (cb.isSelected()) {
 		            // do something if check box is selected
-		        	System.out.println("on");
-		            ScheduledExecutorService ambilightThread = Executors.newSingleThreadScheduledExecutor();
-		            ambilightThread.scheduleAtFixedRate(ambilightRunnable, 0, 100, TimeUnit.MILLISECONDS);
+		        	isRunning = true;
+		        	System.out.println("Starting ambilight.");
 		        } else {
 		            // check box is unselected, do something else
-		        	
-		        	System.out.println("off");
+		        	isRunning = false;
+		        	System.out.println("Pausing ambilight.");
 		        }
 		        
 		    }
