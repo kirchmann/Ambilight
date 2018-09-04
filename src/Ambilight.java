@@ -1,11 +1,5 @@
 import java.awt.*;
 import java.io.IOException;
-import java.util.concurrent.Executors;
-import java.util.concurrent.ScheduledExecutorService;
-import java.util.concurrent.TimeUnit;
-/**
- * 
- */
 
 /**
  * @author Carl Christian
@@ -17,24 +11,6 @@ class Ambilight {
 	private Robot robot;
 	private AmbilightCalculator calculator;
 	
-    public static void main(String[] args) throws IOException {
-        Ambilight ambilight = new Ambilight();
-        ambilight.initialize();
-        Runnable runnable = new Runnable() {
-            public void run() {
-              long startTime = System.nanoTime();
-              ambilight.takeScreenshot();
-              ambilight.calculateColorOfAllLEDs();
-              ambilight.flushBufferedImage();
-              ambilight.sendDataToCompPort();
-              long endTime = System.nanoTime();
-              long duration = (endTime - startTime)/1000000;  //divide by 1000000 to get milliseconds.
-              System.out.println(duration);
-            }
-          };
-          ScheduledExecutorService service = Executors.newSingleThreadScheduledExecutor();
-          service.scheduleAtFixedRate(runnable, 0, 100, TimeUnit.MILLISECONDS);
-    }
     public void initialize() {
         // list all COM in GUI, ask GUI for COM drop down choice?
         this.connectComPort();
@@ -54,7 +30,8 @@ class Ambilight {
     }
     
     //Call this method when exiting program.
-    private void disconnectComPort() {
+    public void disconnectComPort() {
+    	System.out.println("Disconnecting from ComPort ");
     	this.ComPort.disconnect();
     }
     
@@ -71,7 +48,7 @@ class Ambilight {
     }
     
 
-	private void takeScreenshot() {
+	public void takeScreenshot() {
 		this.calculator.bufferedImage = this.robot.createScreenCapture(this.areaForScreenShot);
 	}
 	

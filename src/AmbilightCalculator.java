@@ -2,24 +2,24 @@ import java.awt.Color;
 import java.awt.image.BufferedImage;
 
 public class AmbilightCalculator {
-	static int SCREEN_HEIGHT = 1080;
-	static int SCREEN_WIDTH = 1920;
-	static int NEOPIXELS_WIDTH = 28;
-	static int NEOPIXELS_HEIGHT = 16;
-	static int NEOPIXELS_SUM = 2*NEOPIXELS_HEIGHT + NEOPIXELS_WIDTH;
-	static int NEOPIXEL_AVG_RECT_SIDE_HEIGHT = SCREEN_HEIGHT/NEOPIXELS_HEIGHT;
-	static int RECT_SIDE_WIDTH = 80;
-	static int RECT_TOP_HEIGHT = 70;
-	static int RECT_TOP_WIDTH = SCREEN_WIDTH/NEOPIXELS_WIDTH;
-	static int PREAMBLE_LENGTH = 10;
-	int messageSize = NEOPIXELS_SUM*3 + PREAMBLE_LENGTH;
-	static int BYTESPERLED = 3;
+	private static final int SCREEN_HEIGHT = 1080;
+	private static final int SCREEN_WIDTH = 1920;
+	private static final int NEOPIXELS_WIDTH = 28;
+	private static final int NEOPIXELS_HEIGHT = 16;
+	private static final int NEOPIXELS_SUM = 2*NEOPIXELS_HEIGHT + NEOPIXELS_WIDTH;
+	private static final int NEOPIXEL_AVG_RECT_SIDE_HEIGHT = SCREEN_HEIGHT/NEOPIXELS_HEIGHT;
+	private static final int RECT_SIDE_WIDTH = 80;
+	private static final int RECT_TOP_HEIGHT = 70;
+	private static final int RECT_TOP_WIDTH = SCREEN_WIDTH/NEOPIXELS_WIDTH;
+	private static final int PREAMBLE_LENGTH = 10;
+	private static final int messageSize = NEOPIXELS_SUM*3 + PREAMBLE_LENGTH;
+	private static final int BYTESPERLED = 3;
 	public byte[] LED_DATA;
 	public Color colorOfCurrentRectangle;
 	public BufferedImage bufferedImage;
 
 	public AmbilightCalculator() {
-		this.LED_DATA = new byte[this.messageSize];
+		this.LED_DATA = new byte[messageSize];
 	}
 	public void calculateColorOfAllLEDs() {
 		this.calcColorOfSideRectangles();
