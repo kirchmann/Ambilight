@@ -9,7 +9,6 @@ import java.util.concurrent.TimeUnit;
 import javax.swing.JCheckBox;
 import javax.swing.JComboBox;
 import javax.swing.JFrame;
-import javax.swing.JLabel;
 import javax.swing.JTextField;
 import javax.swing.SwingConstants;
 import javax.swing.JButton;
@@ -18,9 +17,9 @@ public class GUI_learning {
 
 	private JFrame frame;
 	private JTextField updatesPerSecondTextField;
-	private JLabel updatesPerSecondTextField_label;
 	private boolean isRunning;
 	private boolean isConnectedToComPort;
+	private int millisecondsPerScreenshot;
 
 	/**
 	 * Launch the application.
@@ -53,7 +52,9 @@ public class GUI_learning {
 		frame.setBounds(100, 100, 339, 255);
 		this.isRunning = false;
 		this.isConnectedToComPort = false;
-		
+        final int initialDelay = 0;
+        millisecondsPerScreenshot = 100000;
+        
         Ambilight ambilight = new Ambilight();
         ambilight.createInstanceOfComPort();
         ambilight.initialize();
@@ -71,8 +72,7 @@ public class GUI_learning {
             	}
             }
           };
-        ScheduledExecutorService ambilightThread = Executors.newSingleThreadScheduledExecutor();
-        ambilightThread.scheduleAtFixedRate(ambilightRunnable, 0, 100, TimeUnit.MILLISECONDS);
+
 		JCheckBox OnOrOffButton = new JCheckBox("On/off");
 		OnOrOffButton.setHorizontalAlignment(SwingConstants.CENTER);
 		OnOrOffButton.setBounds(118, 165, 69, 36);
@@ -101,17 +101,21 @@ public class GUI_learning {
 		frame.getContentPane().setLayout(null);
 		frame.getContentPane().add(OnOrOffButton);
 		
-		updatesPerSecondTextField = new JTextField();
-		updatesPerSecondTextField.setBounds(174, 45, 50, 27);
-		updatesPerSecondTextField.setText("Input");
+		updatesPerSecondTextField = new JTextField("Refresh rate");
+		updatesPerSecondTextField.addActionListener(new ActionListener() {
+		    @Override
+			public void actionPerformed(ActionEvent arg0) {
+				String inputText = updatesPerSecondTextField.getText();
+				millisecondsPerScreenshot = Integer.parseInt(inputText);
+				System.out.println(millisecondsPerScreenshot);
+		        ScheduledExecutorService ambilightThread = Executors.newSingleThreadScheduledExecutor();
+		        ambilightThread.scheduleAtFixedRate(ambilightRunnable, initialDelay, millisecondsPerScreenshot, TimeUnit.MILLISECONDS);
+			}
+		});
+		updatesPerSecondTextField.setBounds(68, 45, 156, 27);
 		updatesPerSecondTextField.setHorizontalAlignment(SwingConstants.LEFT);
 		frame.getContentPane().add(updatesPerSecondTextField);
 		updatesPerSecondTextField.setColumns(3);
-		
-		updatesPerSecondTextField_label = new JLabel("Updates / s:");
-		updatesPerSecondTextField_label.setBounds(68, 40, 69, 36);
-		updatesPerSecondTextField_label.setLabelFor(updatesPerSecondTextField);
-		frame.getContentPane().add(updatesPerSecondTextField_label);
 		
 		JComboBox<String> comboBoxComPorts = new JComboBox<String>();
 		comboBoxComPorts.setBounds(68, 96, 156, 27);
