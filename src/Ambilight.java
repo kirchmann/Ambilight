@@ -1,5 +1,6 @@
 import java.awt.*;
 import java.io.IOException;
+import java.util.ArrayList;
 
 /**
  * @author Carl Christian
@@ -12,18 +13,24 @@ class Ambilight {
 	private AmbilightCalculator calculator;
 	
     public void initialize() {
-        // list all COM in GUI, ask GUI for COM drop down choice?
-        this.connectComPort();
         this.createInstanceOfRobot();
         this.setAreaForScreenshot();
         this.calculator =  new AmbilightCalculator();
         this.setMessagePreamble(); // Won't ever be overwritten.
     }
     
-    private void connectComPort() {
+    public ArrayList<String> listAllAvailabelComPorts() {
+		return ComPort.listAllAvailabelComPorts();
+    }
+
+    public void createInstanceOfComPort() {
     	this.ComPort = new SerialComm();
+    }
+
+    public void connectComPort() {
+    	this.ComPort.setcomPortName("COM4");
     	try {
-			this.ComPort.ConnectPort(115200, "COM4");
+			this.ComPort.ConnectPort(115200);
 		} catch (IOException e) {
 			e.printStackTrace();
 		} 

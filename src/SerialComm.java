@@ -1,5 +1,8 @@
 import java.io.IOException;
 import java.io.OutputStream;
+import java.util.ArrayList;
+import java.util.Enumeration;
+
 import gnu.io.CommPortIdentifier;
 import gnu.io.NoSuchPortException;
 import gnu.io.PortInUseException;
@@ -17,13 +20,14 @@ import gnu.io.UnsupportedCommOperationException;
 public class SerialComm {
     private SerialPort serialPort;
     private OutputStream outStream;
+    private String comPortName;
     SerialComm(){
 	}
-	public void ConnectPort(int baudRate,String ComPort)throws IOException {
+	public void ConnectPort(int baudRate)throws IOException {
         try {
-            CommPortIdentifier portId = CommPortIdentifier.getPortIdentifier(ComPort);
-            System.out.println("Found port: "+portId.getName());
-            serialPort = (SerialPort) portId.open("Ambilight", 5000);
+            CommPortIdentifier portId = CommPortIdentifier.getPortIdentifier(this.comPortName);
+            System.out.println("Found port: " + this.comPortName);
+            this.serialPort = (SerialPort) portId.open("Ambilight", 5000);
             try {
 				Thread.sleep(4000);
 			} catch (InterruptedException e) {
@@ -40,7 +44,18 @@ public class SerialComm {
 		}
         outStream = serialPort.getOutputStream();
 	}
-
+	
+	public ArrayList<String> listAllAvailabelComPorts() {
+		Enumeration<CommPortIdentifier> pList = CommPortIdentifier.getPortIdentifiers();
+		ArrayList<String> listOfComPorts = new ArrayList<String>(); 
+		
+		while (pList.hasMoreElements()) {
+		      CommPortIdentifier cpi = (CommPortIdentifier) pList.nextElement();
+		      listOfComPorts.add(cpi.getName());
+		      System.out.print("Port " + cpi.getName() + " ");
+	    }
+		return listOfComPorts;
+	}
 	
     private OutputStream getSerialOutputStream() {
         return outStream;
@@ -55,9 +70,6 @@ public class SerialComm {
 		}
     }
     
-    /**
-     * Write to the serial port output stream
-     */
     public void disconnect()
     {
         try
@@ -72,5 +84,11 @@ public class SerialComm {
             System.out.println(logText);
         }
     }
+	public String getcomPortName() {
+		return comPortName;
+	}
+	public void setcomPortName(String comPortName) {
+		this.comPortName = comPortName;
+	}
     
 }
