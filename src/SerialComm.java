@@ -1,13 +1,16 @@
 import java.io.IOException;
+
 import java.io.OutputStream;
 import java.util.ArrayList;
 import java.util.Enumeration;
+import java.util.logging.Logger;
 
 import gnu.io.CommPortIdentifier;
 import gnu.io.NoSuchPortException;
 import gnu.io.PortInUseException;
 import gnu.io.SerialPort;
 import gnu.io.UnsupportedCommOperationException;
+import java.util.logging.Logger;
 
 /**
  * 
@@ -18,6 +21,7 @@ import gnu.io.UnsupportedCommOperationException;
  *
  */
 public class SerialComm {
+	private static final Logger LOGGER = Logger.getLogger( SerialComm.class.getName() );
     private SerialPort serialPort;
     private OutputStream outStream;
     private String comPortName;
@@ -26,7 +30,7 @@ public class SerialComm {
 	public void ConnectPort(int baudRate)throws IOException {
         try {
             CommPortIdentifier portId = CommPortIdentifier.getPortIdentifier(this.comPortName);
-            System.out.println("Found port: " + this.comPortName);
+            LOGGER.info("Trying to connect to comport: " + this.comPortName);
             this.serialPort = (SerialPort) portId.open("Ambilight", 5000);
             try {
 				Thread.sleep(4000);
@@ -43,16 +47,18 @@ public class SerialComm {
 			throw new IOException("Port in use.");
 		}
         outStream = serialPort.getOutputStream();
+        LOGGER.info("Connected to comport: " + this.comPortName);
 	}
 	
 	public ArrayList<String> listAllAvailabelComPorts() {
+		LOGGER.info("List all com ports.");
 		Enumeration<CommPortIdentifier> pList = CommPortIdentifier.getPortIdentifiers();
 		ArrayList<String> listOfComPorts = new ArrayList<String>(); 
-		
+		LOGGER.info("Found com ports: ");
 		while (pList.hasMoreElements()) {
 		      CommPortIdentifier cpi = (CommPortIdentifier) pList.nextElement();
 		      listOfComPorts.add(cpi.getName());
-		      System.out.print("Port " + cpi.getName() + " ");
+		      LOGGER.info(cpi.getName() + ", ");
 	    }
 		return listOfComPorts;
 	}
@@ -72,6 +78,7 @@ public class SerialComm {
     
     public void disconnect()
     {
+    	LOGGER.info("Disconnect from comport: " + this.comPortName);
         try
         {
         	outStream.close();
@@ -80,8 +87,7 @@ public class SerialComm {
         }
         catch (Exception e)
         {
-            String logText = "Failed disconnect. (" + e.toString() + ")";
-            System.out.println(logText);
+        	LOGGER.info("Failed to disconnect, error: "+ e.toString());
         }
     }
 	public String getcomPortName() {

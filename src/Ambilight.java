@@ -1,18 +1,21 @@
 import java.awt.*;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.logging.Logger;
 
 /**
  * @author Carl Christian
  *
  */
 class Ambilight {
+	private static final Logger LOGGER = Logger.getLogger( Ambilight.class.getName() );
 	private SerialComm ComPort;
 	private Rectangle areaForScreenShot;
 	private Robot robot;
 	private AmbilightCalculator calculator;
 	
     public void initialize() {
+    	LOGGER.info("Initialize.");
         this.createInstanceOfRobot();
         this.setAreaForScreenshot();
         this.calculator =  new AmbilightCalculator();
@@ -27,8 +30,9 @@ class Ambilight {
     	this.ComPort = new SerialComm();
     }
 
-    public void connectComPort() {
-    	this.ComPort.setcomPortName("COM4");
+    public void connectComPort(String comPort) {
+    	this.ComPort.setcomPortName(comPort);
+    	//this.ComPort.setcomPortName("COM3");
     	try {
 			this.ComPort.ConnectPort(115200);
 		} catch (IOException e) {
@@ -38,7 +42,6 @@ class Ambilight {
     
     //Call this method when exiting program.
     public void disconnectComPort() {
-    	System.out.println("Disconnecting from ComPort ");
     	this.ComPort.disconnect();
     }
     

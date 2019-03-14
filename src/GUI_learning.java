@@ -13,8 +13,10 @@ import javax.swing.JTextField;
 import javax.swing.SwingConstants;
 import javax.swing.JButton;
 
-public class GUI_learning {
+import java.util.logging.Logger;
 
+public class GUI_learning {
+	private static final Logger LOGGER = Logger.getLogger( GUI_learning.class.getName() );
 	private JFrame frame;
 	private JTextField updatesPerSecondTextField;
 	private boolean isRunning;
@@ -25,6 +27,7 @@ public class GUI_learning {
 	 * Launch the application.
 	 */
 	public static void main(String[] args) {
+		LOGGER.info("Entered Main.");
 		EventQueue.invokeLater(new Runnable() {
 			public void run() {
 				try {
@@ -53,7 +56,7 @@ public class GUI_learning {
 		this.isRunning = false;
 		this.isConnectedToComPort = false;
         final int initialDelay = 0;
-        millisecondsPerScreenshot = 100000;
+        millisecondsPerScreenshot = 65;
         
         Ambilight ambilight = new Ambilight();
         ambilight.createInstanceOfComPort();
@@ -68,7 +71,7 @@ public class GUI_learning {
 	              ambilight.sendDataToCompPort();
 	              long endTime = System.nanoTime();
 	              long duration = (endTime - startTime)/1000000;  //divide by 1000000 to get milliseconds.
-	              System.out.println(duration);
+	              //LOGGER.info("Duration of update:" + duration);
             	}
             }
           };
@@ -83,30 +86,34 @@ public class GUI_learning {
 		        if (cb.isSelected()) {
 		            // do something if check box is selected
 		        	isRunning = true;
-		        	System.out.println("Starting ambilight.");
+		        	LOGGER.info("Starting Ambilight by clicking checkbox.");
 		        } else {
 		            // check box is unselected, do something else
 		        	isRunning = false;
-		        	System.out.println("Pausing ambilight.");
+		        	LOGGER.info("Pausing Ambilight by un-clicking checkbox.");
 		        }
 		    }
 		});
 		frame.addWindowListener(new java.awt.event.WindowAdapter() {
 		    @Override
 		    public void windowClosing(java.awt.event.WindowEvent windowEvent) {
-		    	ambilight.disconnectComPort();
-		    	System.exit(0);
+		    	LOGGER.info("Window closed.");
+		    	if (isConnectedToComPort) {
+		    		ambilight.disconnectComPort();
+		    	}
+	    		System.exit(0);
 		    }
 		});
 		frame.getContentPane().setLayout(null);
 		frame.getContentPane().add(OnOrOffButton);
 		
-		updatesPerSecondTextField = new JTextField("Refresh rate");
+		updatesPerSecondTextField = new JTextField("Refresh rate (~65)");
 		updatesPerSecondTextField.addActionListener(new ActionListener() {
 		    @Override
 			public void actionPerformed(ActionEvent arg0) {
-				String inputText = updatesPerSecondTextField.getText();
-				millisecondsPerScreenshot = Integer.parseInt(inputText);
+		    	String inputText = updatesPerSecondTextField.getText();
+		    	millisecondsPerScreenshot = Integer.parseInt(inputText);
+				LOGGER.info("User set refresh rate: " + inputText);
 				System.out.println(millisecondsPerScreenshot);
 		        ScheduledExecutorService ambilightThread = Executors.newSingleThreadScheduledExecutor();
 		        ambilightThread.scheduleAtFixedRate(ambilightRunnable, initialDelay, millisecondsPerScreenshot, TimeUnit.MILLISECONDS);
@@ -127,7 +134,7 @@ public class GUI_learning {
 				if (isConnectedToComPort) {
 					ambilight.disconnectComPort();
 				}
-				ambilight.connectComPort();
+				ambilight.connectComPort(comboBoxComPorts.getSelectedItem().toString());
 				isConnectedToComPort = true;
 			}
 		});
