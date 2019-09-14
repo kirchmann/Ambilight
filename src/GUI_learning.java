@@ -9,6 +9,7 @@ import java.util.concurrent.TimeUnit;
 import javax.swing.JCheckBox;
 import javax.swing.JComboBox;
 import javax.swing.JFrame;
+import javax.swing.JLabel;
 import javax.swing.JTextField;
 import javax.swing.SwingConstants;
 import javax.swing.JButton;
@@ -52,7 +53,7 @@ public class GUI_learning {
 	 */
 	private void initialize() {
 		frame = new JFrame();
-		frame.setBounds(100, 100, 339, 255);
+		frame.setBounds(100, 100, 315, 255);
 		this.isRunning = false;
 		this.isConnectedToComPort = false;
         final int initialDelay = 0;
@@ -64,31 +65,25 @@ public class GUI_learning {
         Runnable ambilightRunnable = new Runnable() {
             public void run() {
             	if (isRunning && isConnectedToComPort) {
-	              long startTime = System.nanoTime();
 	              ambilight.takeScreenshot();
 	              ambilight.calculateColorOfAllLEDs();
 	              ambilight.flushBufferedImage();
 	              ambilight.sendDataToCompPort();
-	              long endTime = System.nanoTime();
-	              long duration = (endTime - startTime)/1000000;  //divide by 1000000 to get milliseconds.
-	              //LOGGER.info("Duration of update:" + duration);
             	}
             }
           };
 
 		JCheckBox OnOrOffButton = new JCheckBox("On/off");
 		OnOrOffButton.setHorizontalAlignment(SwingConstants.CENTER);
-		OnOrOffButton.setBounds(118, 165, 69, 36);
+		OnOrOffButton.setBounds(114, 173, 69, 36);
 		OnOrOffButton.addActionListener(new ActionListener() {
 		    @Override
 		    public void actionPerformed(ActionEvent event) {
 		        JCheckBox cb = (JCheckBox) event.getSource();
 		        if (cb.isSelected()) {
-		            // do something if check box is selected
 		        	isRunning = true;
 		        	LOGGER.info("Starting Ambilight by clicking checkbox.");
 		        } else {
-		            // check box is unselected, do something else
 		        	isRunning = false;
 		        	LOGGER.info("Pausing Ambilight by un-clicking checkbox.");
 		        }
@@ -106,26 +101,24 @@ public class GUI_learning {
 		});
 		frame.getContentPane().setLayout(null);
 		frame.getContentPane().add(OnOrOffButton);
-		
-		updatesPerSecondTextField = new JTextField("Refresh rate (~65)");
+		updatesPerSecondTextField = new JTextField("65");
 		updatesPerSecondTextField.addActionListener(new ActionListener() {
 		    @Override
 			public void actionPerformed(ActionEvent arg0) {
 		    	String inputText = updatesPerSecondTextField.getText();
 		    	millisecondsPerScreenshot = Integer.parseInt(inputText);
 				LOGGER.info("User set refresh rate: " + inputText);
-				System.out.println(millisecondsPerScreenshot);
 		        ScheduledExecutorService ambilightThread = Executors.newSingleThreadScheduledExecutor();
 		        ambilightThread.scheduleAtFixedRate(ambilightRunnable, initialDelay, millisecondsPerScreenshot, TimeUnit.MILLISECONDS);
 			}
 		});
-		updatesPerSecondTextField.setBounds(68, 45, 156, 27);
+		updatesPerSecondTextField.setBounds(114, 45, 111, 27);
 		updatesPerSecondTextField.setHorizontalAlignment(SwingConstants.LEFT);
 		frame.getContentPane().add(updatesPerSecondTextField);
 		updatesPerSecondTextField.setColumns(3);
 		
 		JComboBox<String> comboBoxComPorts = new JComboBox<String>();
-		comboBoxComPorts.setBounds(68, 96, 156, 27);
+		comboBoxComPorts.setBounds(114, 93, 111, 27);
 		frame.getContentPane().add(comboBoxComPorts);
 		
 		JButton connectInitialize = new JButton("Connect");
@@ -138,8 +131,16 @@ public class GUI_learning {
 				isConnectedToComPort = true;
 			}
 		});
-		connectInitialize.setBounds(108, 135, 89, 23);
+		connectInitialize.setBounds(114, 143, 89, 23);
 		frame.getContentPane().add(connectInitialize);
+		
+		JLabel lblRefreshRate = new JLabel("Refresh rate");
+		lblRefreshRate.setBounds(10, 51, 94, 14);
+		frame.getContentPane().add(lblRefreshRate);
+		
+		JLabel lblComPort = new JLabel("Com port");
+		lblComPort.setBounds(10, 99, 94, 14);
+		frame.getContentPane().add(lblComPort);
 		ArrayList<String> comPortList= ambilight.listAllAvailabelComPorts(); 
 		comPortList.forEach((comport->comboBoxComPorts.addItem(comport)));
 		

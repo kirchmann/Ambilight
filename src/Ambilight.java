@@ -32,7 +32,6 @@ class Ambilight {
 
     public void connectComPort(String comPort) {
     	this.ComPort.setcomPortName(comPort);
-    	//this.ComPort.setcomPortName("COM3");
     	try {
 			this.ComPort.ConnectPort(115200);
 		} catch (IOException e) {
