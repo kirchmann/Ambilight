@@ -5,14 +5,13 @@ Ambilight for computer screen using an arduino and neopixels
 
 ## Built With
 
-* JAVA 9
+* Java 9
 * Arduino
 
-## To do
+## Improvements
 
-* Send RGB values over serial to Arduino
-* Control LEDS with Arduino using RBG values recieved over serial
 * Evaluate performance
+* Base LEDs on equalizer 
 
 ## Authors
 
