@@ -16,8 +16,8 @@ import javax.swing.JButton;
 
 import java.util.logging.Logger;
 
-public class GUI_learning {
-	private static final Logger LOGGER = Logger.getLogger( GUI_learning.class.getName() );
+public class Gui {
+	private static final Logger LOGGER = Logger.getLogger( Gui.class.getName() );
 	private JFrame frame;
 	private JTextField updatesPerSecondTextField;
 	private boolean isRunning;
@@ -32,7 +32,7 @@ public class GUI_learning {
 		EventQueue.invokeLater(new Runnable() {
 			public void run() {
 				try {
-					GUI_learning window = new GUI_learning();
+					Gui window = new Gui();
 					window.frame.setVisible(true);
 				} catch (Exception e) {
 					e.printStackTrace();
@@ -44,7 +44,7 @@ public class GUI_learning {
 	/**
 	 * Create the application.
 	 */
-	public GUI_learning() {
+	public Gui() {
 		initialize();
 	}
 

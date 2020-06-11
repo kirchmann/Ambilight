@@ -1,0 +1,7 @@
+{
+    "neopixels": {
+      "width": 20,
+      "height": 20
+    },
+    "millisecondsPerScreenshot": 65
+  }
