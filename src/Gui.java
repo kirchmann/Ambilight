@@ -20,9 +20,6 @@ public class Gui {
 	private static final Logger LOGGER = Logger.getLogger( Gui.class.getName() );
 	private JFrame frame;
 	private JTextField updatesPerSecondTextField;
-	private boolean isRunning;
-	private boolean isConnectedToComPort;
-	private int millisecondsPerScreenshot;
 
 	/**
 	 * Launch the application.
@@ -54,24 +51,8 @@ public class Gui {
 	private void initialize() {
 		frame = new JFrame();
 		frame.setBounds(100, 100, 315, 255);
-		this.isRunning = false;
-		this.isConnectedToComPort = false;
-        final int initialDelay = 0;
-        millisecondsPerScreenshot = 65;
-        
-        Ambilight ambilight = new Ambilight();
-        ambilight.createInstanceOfComPort();
-        ambilight.initialize();
-        Runnable ambilightRunnable = new Runnable() {
-            public void run() {
-            	if (isRunning && isConnectedToComPort) {
-	              ambilight.takeScreenshot();
-	              ambilight.calculateColorOfAllLEDs();
-	              ambilight.flushBufferedImage();
-	              ambilight.sendDataToCompPort();
-            	}
-            }
-          };
+        AmbilightRunner ambilightRunner = new AmbilightRunner();
+        ambilightRunner.startAmbilight();
 
 		JCheckBox OnOrOffButton = new JCheckBox("On/off");
 		OnOrOffButton.setHorizontalAlignment(SwingConstants.CENTER);
@@ -81,10 +62,10 @@ public class Gui {
 		    public void actionPerformed(ActionEvent event) {
 		        JCheckBox cb = (JCheckBox) event.getSource();
 		        if (cb.isSelected()) {
-		        	isRunning = true;
+		        	ambilightRunner.setIsRunning(true);
 		        	LOGGER.info("Starting Ambilight by clicking checkbox.");
 		        } else {
-		        	isRunning = false;
+		        	ambilightRunner.setIsRunning(false);
 		        	LOGGER.info("Pausing Ambilight by un-clicking checkbox.");
 		        }
 		    }
@@ -93,8 +74,8 @@ public class Gui {
 		    @Override
 		    public void windowClosing(java.awt.event.WindowEvent windowEvent) {
 		    	LOGGER.info("Window closed.");
-		    	if (isConnectedToComPort) {
-		    		ambilight.disconnectComPort();
+		    	if (ambilightRunner.getIsConnectedToComPort()) {
+		    		ambilightRunner.disconnectComPort();
 		    	}
 	    		System.exit(0);
 		    }
@@ -106,10 +87,9 @@ public class Gui {
 		    @Override
 			public void actionPerformed(ActionEvent arg0) {
 		    	String inputText = updatesPerSecondTextField.getText();
-		    	millisecondsPerScreenshot = Integer.parseInt(inputText);
+		    	int millisecondsPerScreenshot = Integer.parseInt(inputText);
 				LOGGER.info("User set refresh rate: " + inputText);
-		        ScheduledExecutorService ambilightThread = Executors.newSingleThreadScheduledExecutor();
-		        ambilightThread.scheduleAtFixedRate(ambilightRunnable, initialDelay, millisecondsPerScreenshot, TimeUnit.MILLISECONDS);
+				ambilightRunner.setMillisecondsPerScreenshot(millisecondsPerScreenshot);
 			}
 		});
 		updatesPerSecondTextField.setBounds(114, 45, 111, 27);
@@ -124,11 +104,12 @@ public class Gui {
 		JButton connectInitialize = new JButton("Connect");
 		connectInitialize.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent arg0) {
-				if (isConnectedToComPort) {
-					ambilight.disconnectComPort();
+				if (ambilightRunner.getIsConnectedToComPort()) {
+					ambilightRunner.disconnectComPort();
 				}
-				ambilight.connectComPort(comboBoxComPorts.getSelectedItem().toString());
-				isConnectedToComPort = true;
+				//ambilight.connectComPort(comboBoxComPorts.getSelectedItem().toString());
+				ambilightRunner.connectComPort(comboBoxComPorts.getSelectedItem().toString());
+				ambilightRunner.setIsConnectedToComPort(true);
 			}
 		});
 		connectInitialize.setBounds(114, 143, 89, 23);
@@ -141,7 +122,8 @@ public class Gui {
 		JLabel lblComPort = new JLabel("Com port");
 		lblComPort.setBounds(10, 99, 94, 14);
 		frame.getContentPane().add(lblComPort);
-		ArrayList<String> comPortList= ambilight.listAllAvailabelComPorts(); 
+		//ArrayList<String> comPortList= ambilight.listAllAvailabelComPorts();
+		ArrayList<String> comPortList= ambilightRunner.listAllAvailabelComPorts();
 		comPortList.forEach((comport->comboBoxComPorts.addItem(comport)));
 		
 		
