@@ -13,13 +13,17 @@ class Ambilight {
 	private Rectangle areaForScreenShot;
 	private Robot robot;
 	private AmbilightCalculator calculator;
+	private SettingsContainer settings;
+	
+	public Ambilight(SettingsContainer settings) {
+		this.settings = settings;
+	}
 	
     public void initialize() {
     	LOGGER.info("Initialize.");
         this.createInstanceOfRobot();
         this.setAreaForScreenshot();
-        this.calculator =  new AmbilightCalculator();
-        this.setMessagePreamble(); // Won't ever be overwritten.
+        this.calculator =  new AmbilightCalculator(settings);
     }
     
     public ArrayList<String> listAllAvailabelComPorts() {
@@ -53,7 +57,8 @@ class Ambilight {
 	}
     
     private void setAreaForScreenshot() {
-    	this.areaForScreenShot = new Rectangle(Toolkit.getDefaultToolkit().getScreenSize()); 
+    	this.areaForScreenShot = this.settings.screenSize;
+    	LOGGER.info("Setting area for screenshot: " + this.areaForScreenShot.width + "x" + this.areaForScreenShot.height);
     }
     
 

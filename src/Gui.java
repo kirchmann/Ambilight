@@ -2,10 +2,6 @@ import java.awt.EventQueue;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.util.ArrayList;
-import java.util.concurrent.Executors;
-import java.util.concurrent.ScheduledExecutorService;
-import java.util.concurrent.TimeUnit;
-
 import javax.swing.JCheckBox;
 import javax.swing.JComboBox;
 import javax.swing.JFrame;
@@ -57,6 +53,7 @@ public class Gui {
 		JCheckBox OnOrOffButton = new JCheckBox("On/off");
 		OnOrOffButton.setHorizontalAlignment(SwingConstants.CENTER);
 		OnOrOffButton.setBounds(114, 173, 69, 36);
+		OnOrOffButton.setSelected(ambilightRunner.getIsRunning());
 		OnOrOffButton.addActionListener(new ActionListener() {
 		    @Override
 		    public void actionPerformed(ActionEvent event) {

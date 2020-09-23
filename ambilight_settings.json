@@ -1,7 +1,8 @@
 {
     "neopixels": {
-      "width": 20,
-      "height": 20
+      "width": 28,
+      "height": 16
     },
-    "millisecondsPerScreenshot": 65
+    "millisecondsPerScreenshot": 65,
+    "comport": "COM3",
   }

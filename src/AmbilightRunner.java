@@ -1,3 +1,5 @@
+import java.awt.Rectangle;
+import java.awt.Toolkit;
 import java.util.ArrayList;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
@@ -10,14 +12,17 @@ public class AmbilightRunner {
 	private boolean isRunning;
 	private boolean isConnectedToComPort;
 	private Runnable ambilightRunnable;
+	private SettingsContainer settings;
 	
 	public AmbilightRunner() {
-		this.isRunning = false;
+		this.getSettings();
+		this.isRunning = true;
 		this.isConnectedToComPort = false;
-		this.millisecondsPerScreenshot = 65;
+		this.millisecondsPerScreenshot = settings.refreshRate;
 		
-        this.ambilight = new Ambilight();
+        this.ambilight = new Ambilight(this.settings);
         ambilight.createInstanceOfComPort();
+        this.connectComPort(settings.comPort);
         ambilight.initialize();
         ambilightRunnable = new Runnable() {
             public void run() {
@@ -30,6 +35,13 @@ public class AmbilightRunner {
             }
           };
 	}
+	
+    public void getSettings() {
+    	SettingsReader settingsReader = new SettingsReader();
+    	this.settings = settingsReader.readSettingsJson();
+    	this.settings.screenSize = new Rectangle(Toolkit.getDefaultToolkit().getScreenSize());
+    }
+    
 	
 	void startAmbilight() {
         ScheduledExecutorService ambilightThread = Executors.newSingleThreadScheduledExecutor();
@@ -48,6 +60,10 @@ public class AmbilightRunner {
 	public void disconnectComPort() {
 		ambilight.disconnectComPort();
 		this.isConnectedToComPort = false;
+	}
+	
+	public boolean getIsRunning() {
+		return this.isRunning;
 	}
 	
 	public void setIsRunning(boolean isRunning) {
