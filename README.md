@@ -8,6 +8,9 @@ Ambilight for computer screen using an arduino and neopixels
 * Java 9
 * Arduino
 
+## RXTX setup
+http://rxtx.qbang.org/wiki/index.php/Download
+http://rxtx.qbang.org/wiki/index.php/Using_RXTX_In_Eclipse
 
 ## Authors
 
