@@ -1,7 +1,9 @@
 import java.awt.Color;
 import java.awt.image.BufferedImage;
+import java.util.logging.Logger;
 
 public class AmbilightCalculator {
+	private static final Logger LOGGER = Logger.getLogger( AmbilightCalculator.class.getName() );
 	private int screenHeight;
 	private int screenWidth;
 	private int neopixelsWidth;
@@ -31,11 +33,14 @@ public class AmbilightCalculator {
 		this.setMessagePreamble();
 	}
 	public void calculateColorOfAllLEDs() {
+		LOGGER.info("calculateColorOfAllLEDs");
 		this.calcColorOfSideRectangles();
         this.calcColorOfTopRectangles();
 	}
 	
 	private void calcColorOfSideRectangles() {
+		LOGGER.info("calcColorOfSideRectangles");
+		LOGGER.info("res: " + screenWidth + "x" + screenHeight);
         int k = PREAMBLE_LENGTH;
         int j = PREAMBLE_LENGTH + BYTESPERLED*neopixelsHeight + BYTESPERLED*neopixelsWidth;
         for (int i = 0; i < neopixelsHeight; i++) {
@@ -49,7 +54,8 @@ public class AmbilightCalculator {
 	}
 	
 	private void calcColorOfTopRectangles() {
-		int j = PREAMBLE_LENGTH + BYTESPERLED*neopixelsHeight;
+    	LOGGER.info("calcColorOfTopRectangles");
+    	int j = PREAMBLE_LENGTH + BYTESPERLED*neopixelsHeight;
 	    for (int i = 0; i < neopixelsWidth; i++) {
 	    	this.getAvgColorOfTopRectangle((i)*recTopWidth);
 	    	this.setLEDdata(j);
@@ -63,6 +69,8 @@ public class AmbilightCalculator {
      * (x0,y0) is your upper left coordinate
      */
     private void getAvgColorOfSideRectangle(int x0, int y0) {
+    	LOGGER.info("getAvgColorOfSideRectangle");
+    	LOGGER.info("res: " + screenWidth + "x" + screenHeight);
         int x1 = x0 + RECT_SIDE_WIDTH;
         int y1 = y0 + neopixelAvgRectSideHeight;
         long sumRed = 0, sumGreen = 0, sumBlue = 0;
@@ -78,6 +86,7 @@ public class AmbilightCalculator {
         this.colorOfCurrentRectangle = new Color((int)(sumRed / divisorForAveraging), (int)(sumGreen / divisorForAveraging), (int)(sumBlue / divisorForAveraging));
     }
       private void getAvgColorOfTopRectangle(int x0) {
+    	  LOGGER.info("getAvgColorOfTopRectangle");
     	  int x1 = x0 + recTopWidth;
           int y1 = RECT_TOP_HEIGHT;
           long sumRed = 0, sumGreen = 0, sumBlue = 0;
@@ -110,5 +119,13 @@ public class AmbilightCalculator {
         this.LED_DATA[7] = (byte)0x07;
         this.LED_DATA[8] = (byte)0x08;
         this.LED_DATA[9] = (byte)0x09;	
+    }
+    
+    public void updateScreenSize(int width, int height) {
+    	LOGGER.info("new res: " + width +"x" + height);
+    	this.screenHeight = height;
+		this.screenWidth = width;
+		this.neopixelAvgRectSideHeight = screenHeight/neopixelsHeight;
+		this.recTopWidth = screenWidth/neopixelsWidth;
     }
 }

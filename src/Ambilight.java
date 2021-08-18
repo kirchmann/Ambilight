@@ -22,8 +22,9 @@ class Ambilight {
     public void initialize() {
     	LOGGER.info("Initialize.");
         this.createInstanceOfRobot();
-        this.setAreaForScreenshot();
         this.calculator =  new AmbilightCalculator(settings);
+        this.setAreaForScreenshot();
+        
     }
     
     public ArrayList<String> listAllAvailabelComPorts() {
@@ -58,15 +59,20 @@ class Ambilight {
     
     public void setAreaForScreenshot() {
     	this.areaForScreenShot = this.settings.screenSize;
+    	if (calculator!=null) {
+    		calculator.updateScreenSize(settings.screenSize.width, settings.screenSize.height);
+    	}
     	LOGGER.info("Setting area for screenshot: " + this.areaForScreenShot.width + "x" + this.areaForScreenShot.height);
     }
     
 
 	public void takeScreenshot() {
+		LOGGER.info("Take screenshot");
 		this.calculator.bufferedImage = this.robot.createScreenCapture(this.areaForScreenShot);
 	}
 	
 	public void sendDataToCompPort() {
+		LOGGER.info("Sending data");
 		this.ComPort.writeLedData(this.calculator.LED_DATA);
 	}
 	
@@ -75,10 +81,12 @@ class Ambilight {
 	}
 	
 	public void calculateColorOfAllLEDs() {
+		LOGGER.info("calculateColorOfAllLEDs");
 		this.calculator.calculateColorOfAllLEDs();
 	}
 	
 	public void flushBufferedImage() {
+		LOGGER.info("flushBufferedImage");
 		this.calculator.bufferedImage.flush();
 	}
 
