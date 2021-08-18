@@ -1,3 +1,4 @@
+import java.awt.Dimension;
 import java.awt.Rectangle;
 import java.awt.Toolkit;
 import java.util.ArrayList;
@@ -27,6 +28,14 @@ public class AmbilightRunner {
         ambilightRunnable = new Runnable() {
             public void run() {
             	if (isRunning && isConnectedToComPort) {
+            	  Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize();
+            	  if(screenSize.width != settings.screenSize.width || screenSize.height != settings.screenSize.height )
+            	  {
+            		  settings.screenSize.width = screenSize.width;
+            		  settings.screenSize.height = screenSize.height;
+            		  ambilight.setAreaForScreenshot();
+            	  }
+            	  
 	              ambilight.takeScreenshot();
 	              ambilight.calculateColorOfAllLEDs();
 	              ambilight.flushBufferedImage();

@@ -56,7 +56,7 @@ class Ambilight {
 		}
 	}
     
-    private void setAreaForScreenshot() {
+    public void setAreaForScreenshot() {
     	this.areaForScreenShot = this.settings.screenSize;
     	LOGGER.info("Setting area for screenshot: " + this.areaForScreenShot.width + "x" + this.areaForScreenShot.height);
     }
