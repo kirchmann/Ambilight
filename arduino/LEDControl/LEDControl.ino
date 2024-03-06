@@ -12,7 +12,8 @@
 #define MODE_ANIMATION 0
 #define MODE_AMBILIGHT 1
 #define MODE_BLACK 2
-uint8_t mode = MODE_ANIMATION;
+#define MODE_BLUE 3
+uint8_t mode = MODE_BLUE;
 
 byte MESSAGE_PREAMBLE[] = { 0x00, 0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08, 0x09 };
 uint8_t PREAMBLE_LENGTH = 10;
@@ -50,8 +51,12 @@ void loop()
             processIncomingData();
             break;
 
-            case MODE_BLACK:
+        case MODE_BLACK:
             showBlack();
+            break;
+
+        case MODE_BLUE:
+            showBlue();
             break;
     }
     
@@ -139,6 +144,20 @@ void showBlack()
     for( int i = 0; i < NUM_LEDS; i++) 
     {
         leds[i] = CRGB(0,0,0);
+    }
+    FastLED.delay(1000 / UPDATES_PER_SECOND);
+
+    if (Serial.available() > 0)
+    {
+        mode = MODE_AMBILIGHT;
+    }
+}
+
+void showBlue()
+{     
+    for( int i = 0; i < NUM_LEDS; i++) 
+    {
+        leds[i] = CRGB(5,5,10);
     }
     FastLED.delay(1000 / UPDATES_PER_SECOND);
 
