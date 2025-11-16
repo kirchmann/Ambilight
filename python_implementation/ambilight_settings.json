@@ -1,0 +1,10 @@
+{
+    "neopixels": {
+      "width": 28,
+      "height": 16
+    },
+    "fps": 25,
+    "comport": "COM3",
+    "baud_rate": 115200,
+    "sampling_depth": 20
+  }
