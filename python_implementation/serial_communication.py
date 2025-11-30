@@ -9,8 +9,6 @@ class SerialCommunication:
         self.baudrate = baudrate
         self.timeout = timeout
         self.connection = None
-        self._last_send_time = 0.0
-        self._min_frame_interval = 0.03  # seconds - throttle sends to avoid Arduino confusion
 
     def open(self, attempts: int = 20, delay: float = 0.5):
         for attempt in range(1, attempts + 1):
@@ -51,27 +49,7 @@ class SerialCommunication:
         """
         if self.connection and self.connection.is_open:
             packet = PRE_AMBLE + data
-
-            # throttle sends so Arduino has time to switch from processing to waiting for preamble
-            now = time.time()
-            since = now - self._last_send_time
-            if since < self._min_frame_interval:
-                time.sleep(self._min_frame_interval - since)
-
-            # clear any stale input that could confuse Arduino's preamble matcher
-            try:
-                self.connection.reset_input_buffer()
-            except Exception:
-                pass
-            # write & flush
             self.connection.write(packet)
-            try:
-                self.connection.flush()
-            except Exception:
-                pass
-            # increase this slightly if you still see flicker
-            time.sleep(0.02)
-            self._last_send_time = time.time()
             # debug
             print(f"[TX] Sent ({len(packet)} bytes): {packet[:30].hex()} ...")
         else:
