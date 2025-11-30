@@ -82,7 +82,7 @@ class SerialCommunication:
             raise ConnectionError("Serial connection is not open.")
 
     def read_data(self, size: int = 1) -> bytes:
-        if self.connection and not self.connection.is_open:
+        if self.connection and self.connection.is_open:
             incoming = self.connection.read(size)
             print(f"[RX] Received: {incoming}")
             return incoming
