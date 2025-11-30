@@ -40,7 +40,7 @@ class AmbilightCalculator:
         self.resolution_monitor.start()
 
         # Start capture thread (it will wait until resolution is available)
-        self._capture_thread = threading.Thread(target=self._capture_loop, daemon=True)
+        self._capture_thread = threading.Thread(target=self._capture_loop, daemon=True, name="AmbilightCaptureScreenshotsThread")
         self._capture_thread.start()
 
     def _on_resolution_change(self, width: int, height: int):

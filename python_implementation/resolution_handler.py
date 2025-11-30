@@ -4,15 +4,16 @@ import threading
 import time
 
 class ScreenResolutionMonitor(threading.Thread):
-    def __init__(self, callback, poll_interval=1.0):
+    def __init__(self, callback, poll_interval=1.0, name="ScreenResolutionMonitor"):
         """
         Monitors the primary screen resolution and calls `callback(width, height)` 
         whenever it changes.
         
         :param callback: function to call when resolution changes
         :param poll_interval: how often to check resolution (in seconds)
+        :param name: thread name
         """
-        super().__init__(daemon=True)
+        super().__init__(daemon=True, name=name)
         if sys.platform != "win32":
             raise RuntimeError("ScreenResolutionMonitor only works on Windows.")
         
@@ -38,16 +39,15 @@ class ScreenResolutionMonitor(threading.Thread):
     def stop(self):
         self._stop_event.set()
 
+
 # Example usage
 def resolution_changed(width, height):
-    print(f"Screen resolution changed: {width} x {height}")
+    print(f"[{threading.current_thread().name}] Screen resolution changed: {width} x {height}")
 
 if __name__ == "__main__":
-    # to try the ScreenResolutionMonitor
     monitor = ScreenResolutionMonitor(resolution_changed, poll_interval=1.0)
     monitor.start()
     try:
-        # Keep the main thread alive while monitoring
         while True:
             time.sleep(0.5)
     except KeyboardInterrupt:
