@@ -12,27 +12,23 @@ class SerialCommunication:
         self._last_send_time = 0.0
         self._min_frame_interval = 0.03  # seconds - throttle sends to avoid Arduino confusion
 
-    def open(self):
-        # open without toggling DTR/RTS that can reset Arduino
-        # create port then explicitly clear DTR/RTS
-        self.connection = serial.Serial(self.port, self.baudrate, timeout=self.timeout)
-        try:
-            # prevent auto-reset on some boards
+    def open(self, attempts: int = 20, delay: float = 0.5):
+        for attempt in range(1, attempts + 1):
             try:
-                self.connection.setDTR(False)
-            except Exception:
-                pass
-            try:
-                self.connection.setRTS(False)
-            except Exception:
-                pass
-            # clear any leftover input so Arduino doesn't see old bytes
-            self.connection.reset_input_buffer()
-            self.connection.reset_output_buffer()
-        except Exception:
-            pass
+                self.connection = serial.Serial(self.port, self.baudrate, timeout=self.timeout)
+                break  # success
+            except serial.SerialException as e:
+                print(f"[WARN] Cannot open {self.port} (attempt {attempt}/{attempts}): {e}")
+                time.sleep(delay)
+        else:
+            raise ConnectionError(f"Failed to open {self.port} after {attempts} attempts.")
+
+        # Clear any stale data
+        self.connection.reset_input_buffer()
+        self.connection.reset_output_buffer()
         print(f"[OK] Opened serial port {self.port} at {self.baudrate} baud")
-        time.sleep(3.0)  # wait for Arduino to initialize if needed
+        time.sleep(3.0)  # Arduino boot reset delay - guesswork at timing
+
 
     def close(self):
         if self.connection is not None:
