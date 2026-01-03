@@ -1,3 +1,4 @@
+from pathlib import Path
 from settings_reader import load_settings
 from serial_communication import SerialCommunication
 from ambilight_calculator import AmbilightCalculator
@@ -25,7 +26,8 @@ class AmbilightController:
         return False
 
 if __name__ == "__main__":
-    settings = load_settings()
+    path = Path(__file__).parent / "ambilight_settings.json"
+    settings = load_settings(path)
     with AmbilightController(
         leds_per_side=settings.neopixels.width,
         leds_height=settings.neopixels.height,

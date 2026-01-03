@@ -31,13 +31,13 @@ def _validate_int(value: Any, name: str) -> int:
     return value
 
 
-def load_settings() -> Settings:
+def load_settings(path: Path) -> Settings:
     """
     Load and validate settings from ambilight_settings.json.
 
     Default file name: ambilight_settings.json in the same directory as this module.
     """
-    path = Path(__file__).parent / "ambilight_settings.json"
+    
     print (f"Loading settings from: {path}")
 
     data = _load_json(path)
@@ -73,7 +73,8 @@ def load_settings() -> Settings:
 if __name__ == "__main__":
     # quick test / demonstration
     try:
-        settings = load_settings()  # looks for ambilight_settings.json next to this file
+        path = Path(__file__).parent / "ambilight_settings.json"
+        settings = load_settings(path)  # looks for ambilight_settings.json next to this file
         print(settings)
     except Exception as e:
         print(f"Failed to load settings: {e}")
