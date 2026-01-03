@@ -2,6 +2,25 @@
 
 Ambilight for computer screen using an arduino and neopixels
 
+## Python implementation
+Only tested with Python version: 3.12
+
+### Create an .exe:
+
+python -m venv ambilight_env
+
+./.ambilight_env/Scripts/Activate.ps1
+
+python -m pip install -r <some_path>Ambilight\python_implementation\requirements.txt
+
+cd python_implementation
+
+pyside6-deploy ambilight.py --name ambilight
+
+./ambilight.exe "ambilight_settings.json"
+
+Where you have to set the settings according to your setup.
+
 
 ## Built With
 
