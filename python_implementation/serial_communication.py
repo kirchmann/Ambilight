@@ -51,7 +51,7 @@ class SerialCommunication:
             packet = PRE_AMBLE + data
             self.connection.write(packet)
             # debug
-            print(f"[TX] Sent ({len(packet)} bytes): {packet[:30].hex()} ...")
+            #print(f"[TX] Sent ({len(packet)} bytes): {packet[:30].hex()} ...")
         else:
             raise ConnectionError("Serial connection is not open.")
 
